@@ -1,0 +1,107 @@
+ManifestFileVersion: 0
+CRC: 3762386252
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 4651a55f23b57b2b5708812d7b2b4be7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 64e2031019970e6e81b31f111684fbc7
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 4651a55f23b57b2b5708812d7b2b4be7
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 58
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 3678c4bb02be8674cb275427847ca801, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: dfac11b25facbd6488fd108e4c5b4407, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 221
+  Script: {instanceID: 0}
+- Class: 687078895
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: Assembly-CSharp
+  ClassName: RoleProperty
+Assets:
+- "Assets/Editor/ArtRes/playerpiece/\u76FE\u62182.prefab"
+- "Assets/Resources/playerpiece/\u76FE\u62182.prefab"
+- "Assets/Resources/playerpiece/\u5251\u58EB2.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5F13\u7BAD2.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E081.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u91CD\u52513.prefab"
+- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E081.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u91CD\u52511.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5F13\u7BAD1.prefab"
+- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E081.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u5F293.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB3.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u523A\u5BA23.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u706B\u6CD5\u5E081.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u7267\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u76FE\u62183.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u5F291.prefab"
+- "Assets/Resources/playerpiece/\u840C\u65B0.prefab"
+- "Assets/Resources/playerpiece/\u5F13\u7BAD2.prefab"
+- "Assets/Resources/playerpiece/\u7267\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u7267\u5E081.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB2.prefab"
+- "Assets/Resources/playerpiece/\u5F13\u7BAD3.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u52512.prefab"
+- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E083.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u76FE\u62181.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u91CD\u52512.prefab"
+- "Assets/Resources/playerpiece/\u5F13\u7BAD1.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u7267\u5E081.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E082.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F292.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA22.prefab"
+- "Assets/Resources/playerpiece/\u5251\u58EB3.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u76FE\u62183.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u7267\u5E082.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u52513.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u706B\u6CD5\u5E082.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB1.prefab"
+- "Assets/Resources/playerpiece/\u5251\u58EB1.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u5F292.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u840C\u65B0.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F291.prefab"
+- "Assets/Resources/playerpiece/\u76FE\u62181.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u52511.prefab"
+- "Assets/Resources/playerpiece/\u7267\u5E082.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA21.prefab"
+- "Assets/Resources/playerpiece/\u523A\u5BA21.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F293.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5F13\u7BAD3.prefab"
+- "Assets/Resources/playerpiece/\u523A\u5BA22.prefab"
+- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA23.prefab"
+- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E082.prefab"
+- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E082.prefab"
+Dependencies: []

@@ -1,0 +1,24 @@
+ManifestFileVersion: 0
+CRC: 1149053535
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: d25d6726f5d5ee4155f43d9e3668de63
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 9a2ca7bdbd1871f7131daf57de908e0c
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: d25d6726f5d5ee4155f43d9e3668de63
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Editor/ArtRes/sound/hit_4.mp3
+- "Assets/Editor/ArtRes/sound/\u6309\u94AE\u5173\u95ED\u540E\u9000.mp3"
+- "Assets/Editor/ArtRes/sound/\u6309\u94AE\u70B9\u51FB.mp3"
+- "Assets/Editor/ArtRes/sound/\u53F2\u83B1\u59C6\u6B7B\u4EA1.mp3"
+- "Assets/Editor/ArtRes/sound/\u53F2\u83B1\u59C6\u843D\u5B50.mp3"
+Dependencies: []

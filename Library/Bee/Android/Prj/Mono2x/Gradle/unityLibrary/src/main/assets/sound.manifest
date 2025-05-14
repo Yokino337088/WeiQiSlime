@@ -1,0 +1,20 @@
+ManifestFileVersion: 0
+CRC: 3513161243
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 8fb690cb76aec99d2a18453a9a2f0818
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 9a2ca7bdbd1871f7131daf57de908e0c
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 8fb690cb76aec99d2a18453a9a2f0818
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Editor/ArtRes/sound/hit_4.mp3
+Dependencies: []

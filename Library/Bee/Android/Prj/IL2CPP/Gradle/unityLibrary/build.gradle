@@ -1,0 +1,75 @@
+apply plugin: 'com.android.library'
+
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+// Android Resolver Dependencies Start
+    implementation 'com.android.support:appcompat-v7:28.0.0' // Assets/AnyThinkPlugin/AnyThinkAds/Plugins/Android/China/Editor/Dependencies.xml:3
+// Android Resolver Dependencies End
+    implementation(name: 'ads-sdk-pro-6.7.0.7', ext:'aar')
+    implementation(name: 'anythink_bridge', ext:'aar')
+    implementation(name: 'anythink_rewardvideo', ext:'aar')
+    implementation(name: 'anythink_native', ext:'aar')
+    implementation(name: 'anythink_network_unity_csj', ext:'aar')
+    implementation(name: 'anythink_china_core', ext:'aar')
+    implementation(name: 'anythink_interstitial', ext:'aar')
+    implementation(name: 'anythink_splash', ext:'aar')
+    implementation(name: 'anythink_network_unity_gdt', ext:'aar')
+    implementation(name: 'GDTSDK.unionNormal.4.630.1500', ext:'aar')
+    implementation(name: 'miui_sys_splash_1.0', ext:'aar')
+    implementation(name: 'anythink_core', ext:'aar')
+    implementation(name: 'anythink_banner', ext:'aar')
+    implementation project('xrmanifest.androidlib')
+
+}
+
+// Android Resolver Exclusions Start
+android {
+  packagingOptions {
+      exclude ('/lib/armeabi/*' + '*')
+      exclude ('/lib/mips/*' + '*')
+      exclude ('/lib/mips64/*' + '*')
+      exclude ('/lib/x86/*' + '*')
+      exclude ('/lib/x86_64/*' + '*')
+  }
+}
+// Android Resolver Exclusions End
+android {
+    ndkPath "C:/Program Files/Unity/Hub/Editor/2022.3.15f1c1/Editor/Data/PlaybackEngines/AndroidPlayer/NDK"
+
+    compileSdkVersion 32
+    buildToolsVersion '32.0.0'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        minSdkVersion 22
+        targetSdkVersion 32
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+        versionCode 1
+        versionName '1.0'
+        consumerProguardFiles 'proguard-unity.txt'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    aaptOptions {
+        noCompress = ['.unity3d', '.ress', '.resource', '.obb', '.bundle', '.unityexp'] + unityStreamingAssets.tokenize(', ')
+        ignoreAssetsPattern = "!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+    packagingOptions {
+        doNotStrip '*/armeabi-v7a/*.so'
+        doNotStrip '*/arm64-v8a/*.so'
+    }
+}
+
+
+

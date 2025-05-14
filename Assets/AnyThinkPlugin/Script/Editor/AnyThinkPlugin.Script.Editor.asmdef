@@ -1,0 +1,11 @@
+{
+    "name": "AnyThinkPlugin.Script.Editor",
+    "references": [
+        "AnyThinkPlugin.Script",
+        "AnyThinkPlugin.Script.IntegrationManager.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": []
+}

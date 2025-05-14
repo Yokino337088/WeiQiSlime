@@ -1,0 +1,43 @@
+{
+  "name": "com.unity.xr.management",
+  "displayName": "XR Plugin Management",
+  "version": "4.5.1",
+  "unity": "2020.3",
+  "unityRelease": "15f1",
+  "description": "Package that provides simple management of XR plug-ins. Manages and offers help with loading, initialization, settings, and build support for XR plug-ins.",
+  "keywords": [
+    "xr",
+    "sdk",
+    "ar",
+    "vr",
+    "management",
+    "build",
+    "plugin"
+  ],
+  "dependencies": {
+    "com.unity.modules.subsystems": "1.0.0",
+    "com.unity.modules.vr": "1.0.0",
+    "com.unity.modules.xr": "1.0.0",
+    "com.unity.xr.core-utils": "2.2.1",
+    "com.unity.xr.legacyinputhelpers": "2.1.11"
+  },
+  "repository": {
+    "url": "https://github.cds.internal.unity3d.com/unity/xr.sdk.management.git",
+    "type": "git",
+    "revision": "0fe78d9177c9f96352ea5d06283c26e42f9ed490"
+  },
+  "_upm": {
+    "changelog": "### Fixed\n- RunInBackground is not checked and when the application is paused locking the visuals to the users face.\n- Issue where disabled loaders could be inadvertently enabled.\n\n### Added\n- Added a Project Validation check for project settings related to running in background in order to avoid head-locked rendering of the main camera when focus is lost.\n\n### Changes\n- Meta Quest Platform and Build Profile enable 'Unity: Meta OpenXR' when switched to."
+  },
+  "upmCi": {
+    "footprint": "96cf27dc56ac36c84cfcaec5c28cfda979aa8845"
+  },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.xr.management@4.5/manual/index.html",
+  "samples": [
+    {
+      "displayName": "Example XR Management implementation",
+      "description": "Example code showing how to implement various portions of the XR Management API.",
+      "path": "Samples~"
+    }
+  ]
+}

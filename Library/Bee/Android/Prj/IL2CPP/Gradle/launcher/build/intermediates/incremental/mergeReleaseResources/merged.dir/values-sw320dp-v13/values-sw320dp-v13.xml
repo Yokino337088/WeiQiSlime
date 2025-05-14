@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="anythink_confirm_dialog_text_size_large">14sp</dimen>
+    <dimen name="anythink_confirm_dialog_text_size_normal">12sp</dimen>
+    <dimen name="anythink_myoffer_half_screen_icon_size">50dp</dimen>
+</resources>
