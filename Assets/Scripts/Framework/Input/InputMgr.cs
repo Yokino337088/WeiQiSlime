@@ -248,7 +248,7 @@ public class InputMgr : BaseManager<InputMgr>
             Touch touch = Input.GetTouch(0); // 获取第一个触点
             if (touch.phase == TouchPhase.Began)
             {
-                Debug.Log("触发点击事件");
+                //Debug.Log("触发点击事件");
                 // 触发点击事件
                 OnScreenTapped?.Invoke(touch.position);
             }

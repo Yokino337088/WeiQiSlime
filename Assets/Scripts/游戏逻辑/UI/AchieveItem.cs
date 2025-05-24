@@ -38,6 +38,13 @@ public class AchieveItem : BasePanel
 
             //增加金币
             GameDataMgr.Instance.playCoin += achieveInfo.f_cjjl;
+            //存档
+            GameDataMgr.Instance.SavePlayerCoin();
+            //改UI
+            UIMgr.Instance.GetPanel<BeginPanel>(panel =>
+            {
+                panel.ChangeCoinNum(GameDataMgr.Instance.playCoin);
+            });
             //隐藏按钮
             btnSure.gameObject.SetActive(false);
 

@@ -50,13 +50,15 @@ public class RoleItem : BasePanel
             txtLock.gameObject.SetActive(false);
 
         if (SceneManager.GetActiveScene().buildIndex == 0)
-            txtPrice.text = (roleInfo.f_exp * 10).ToString();
+            txtPrice.text = (roleInfo.f_exp * 10 * roleInfo.f_level).ToString();
         else
             txtPrice.text = roleInfo.f_exp.ToString();
 
         imgBK.sprite = spriteSource;
 
         imgIcon.sprite = ResMgr.Instance.Load<SpriteAtlas>("ͼƬ/atlas").GetSprite(role.f_icon);
+        
+
     }
 
     public void ClickIcon(BaseEventData data)
@@ -90,7 +92,7 @@ public class RoleItem : BasePanel
         {
             UIMgr.Instance.ShowPanel<BuyPanel>(E_UILayer.Top, (panel) =>
             {
-                panel.ChangeTips(GameObjectMgr.Instance.playerRoleInfo.f_exp * 10, GameObjectMgr.Instance.playerRoleInfo.f_name);
+                panel.ChangeTips(GameObjectMgr.Instance.playerRoleInfo.f_exp * 10* GameObjectMgr.Instance.playerRoleInfo.f_level, GameObjectMgr.Instance.playerRoleInfo.f_name);
                 panel.SetRoleInfo(roleInfo);
             });
             

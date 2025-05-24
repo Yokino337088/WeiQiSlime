@@ -19,7 +19,6 @@ dependencies {
     implementation(name: 'miui_sys_splash_1.0', ext:'aar')
     implementation(name: 'anythink_core', ext:'aar')
     implementation(name: 'anythink_banner', ext:'aar')
-    implementation project('xrmanifest.androidlib')
 
 }
 

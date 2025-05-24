@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1590845419
+CRC: 1184060640
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: ccb384ebb3143ddca8917d8a71fa6188
+    Hash: 09153cb8ddca7e9b9913b01c6eae6d73
   TypeTreeHash:
     serializedVersion: 2
-    Hash: bf6a0f32423fbd25a9dd416367b4e8d9
+    Hash: 8ca0341bbaadf4b90e9b33685c71d35f
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: ccb384ebb3143ddca8917d8a71fa6188
+    Hash: 09153cb8ddca7e9b9913b01c6eae6d73
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -46,60 +46,60 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: Assembly-CSharp
   ClassName: RoleProperty
 Assets:
-- "Assets/Resources/enemypiece/\u706B\u6CD5\u5E082.prefab"
-- "Assets/Resources/enemypiece/\u76FE\u62182.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u5251\u58EB2.prefab"
-- "Assets/Resources/enemypiece/\u523A\u5BA21.prefab"
+- "Assets/Resources/enemypiece/\u91CD\u5F292.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u706B\u6CD5\u5E083.prefab"
-- "Assets/Resources/enemypiece/\u91CD\u52512.prefab"
-- "Assets/Resources/enemypiece/\u91CD\u5F293.prefab"
-- "Assets/Editor/ArtRes/enemypiece/\u7267\u5E081.prefab"
-- "Assets/Resources/enemypiece/\u706B\u6CD5\u5E083.prefab"
-- "Assets/Resources/enemypiece/\u6C34\u6CD5\u5E081.prefab"
-- "Assets/Resources/enemypiece/\u5251\u58EB1.prefab"
 - "Assets/Resources/enemypiece/\u523A\u5BA22.prefab"
-- "Assets/Resources/enemypiece/\u7267\u5E082.prefab"
-- "Assets/Resources/enemypiece/\u91CD\u52513.prefab"
-- "Assets/Resources/enemypiece/\u5F13\u7BAD3.prefab"
+- "Assets/Editor/ArtRes/enemypiece/\u7267\u5E081.prefab"
+- "Assets/Resources/enemypiece/\u91CD\u5F293.prefab"
+- "Assets/Resources/enemypiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Resources/enemypiece/\u76FE\u62181.prefab"
+- "Assets/Resources/enemypiece/\u91CD\u52511.prefab"
+- "Assets/Resources/enemypiece/\u5F13\u7BAD2.prefab"
+- "Assets/Resources/enemypiece/\u706B\u6CD5\u5E082.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u5F13\u7BAD3.prefab"
-- "Assets/Resources/enemypiece/\u523A\u5BA23.prefab"
+- "Assets/Resources/enemypiece/\u5F13\u7BAD3.prefab"
+- "Assets/Resources/enemypiece/\u5251\u58EB3.prefab"
+- "Assets/Resources/enemypiece/\u5251\u58EB1.prefab"
+- "Assets/Resources/enemypiece/\u6C34\u6CD5\u5E083.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u5F13\u7BAD1.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u523A\u5BA21.prefab"
-- "Assets/Resources/enemypiece/\u5F13\u7BAD2.prefab"
+- "Assets/Resources/enemypiece/\u76FE\u62183.prefab"
+- "Assets/Resources/enemypiece/\u706B\u6CD5\u5E081.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u6C34\u6CD5\u5E083.prefab"
-- "Assets/Resources/enemypiece/\u5251\u58EB3.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u91CD\u5F292.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u91CD\u52512.prefab"
+- "Assets/Resources/enemypiece/\u76FE\u62182.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u6C34\u6CD5\u5E081.prefab"
-- "Assets/Resources/enemypiece/\u76FE\u62183.prefab"
-- "Assets/Resources/enemypiece/\u76FE\u62181.prefab"
-- "Assets/Resources/enemypiece/\u91CD\u5F291.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u523A\u5BA23.prefab"
-- "Assets/Resources/enemypiece/\u7267\u5E083.prefab"
+- "Assets/Resources/enemypiece/\u7267\u5E082.prefab"
+- "Assets/Resources/enemypiece/\u840C\u65B0.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u91CD\u52513.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u91CD\u5F293.prefab"
-- "Assets/Resources/enemypiece/\u91CD\u5F292.prefab"
+- "Assets/Resources/enemypiece/\u91CD\u52513.prefab"
+- "Assets/Resources/enemypiece/\u91CD\u52512.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u706B\u6CD5\u5E082.prefab"
-- "Assets/Resources/enemypiece/\u706B\u6CD5\u5E081.prefab"
+- "Assets/Resources/enemypiece/\u6C34\u6CD5\u5E082.prefab"
+- "Assets/Resources/enemypiece/\u523A\u5BA21.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u5251\u58EB3.prefab"
-- "Assets/Resources/enemypiece/\u5F13\u7BAD1.prefab"
-- "Assets/Resources/enemypiece/\u91CD\u52511.prefab"
+- "Assets/Editor/ArtRes/enemypiece/\u76FE\u62182.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u840C\u65B0.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u76FE\u62183.prefab"
-- "Assets/Resources/enemypiece/\u6C34\u6CD5\u5E083.prefab"
-- "Assets/Editor/ArtRes/enemypiece/\u523A\u5BA22.prefab"
-- "Assets/Editor/ArtRes/enemypiece/\u76FE\u62182.prefab"
-- "Assets/Resources/enemypiece/\u6C34\u6CD5\u5E082.prefab"
-- "Assets/Editor/ArtRes/enemypiece/\u7267\u5E083.prefab"
+- "Assets/Resources/enemypiece/\u6C34\u6CD5\u5E081.prefab"
 - "Assets/Resources/enemypiece/\u5251\u58EB2.prefab"
+- "Assets/Editor/ArtRes/enemypiece/\u523A\u5BA22.prefab"
+- "Assets/Resources/enemypiece/\u523A\u5BA23.prefab"
+- "Assets/Editor/ArtRes/enemypiece/\u7267\u5E083.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u5F13\u7BAD2.prefab"
-- "Assets/Resources/enemypiece/\u840C\u65B0.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u5251\u58EB1.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u76FE\u62181.prefab"
+- "Assets/Resources/enemypiece/\u5F13\u7BAD1.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u91CD\u5F291.prefab"
+- "Assets/Resources/enemypiece/\u91CD\u5F291.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u7267\u5E082.prefab"
+- "Assets/Resources/enemypiece/\u7267\u5E081.prefab"
+- "Assets/Resources/enemypiece/\u7267\u5E083.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u706B\u6CD5\u5E081.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u6C34\u6CD5\u5E082.prefab"
 - "Assets/Editor/ArtRes/enemypiece/\u91CD\u52511.prefab"
-- "Assets/Resources/enemypiece/\u7267\u5E081.prefab"
 Dependencies: []

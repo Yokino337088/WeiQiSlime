@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using static ChessPiece;
 //using static UnityEditor.PlayerSettings;
 
 public class ChessBoard : MonoBehaviour
@@ -14,8 +15,8 @@ public class ChessBoard : MonoBehaviour
     public int boardWidth = 8; // 棋盘的宽度（格子数）
     public int boardHeight = 8; // 棋盘的高度（格子数）
 
-    private ChessPiece selectedPiece; // 当前选中的棋子
-    
+    public ChessPiece selectedPiece; // 当前选中的棋子
+
     public List<Vector2> validMovePositions = new List<Vector2>(); // 可移动的空位置
 
     public GameObject point;
@@ -26,6 +27,10 @@ public class ChessBoard : MonoBehaviour
     private List<GameObject> atkPoints = new List<GameObject>();
 
     List<T_Role> nowLevelRole = new List<T_Role>();
+
+    private Coroutine checkPieceIsOverlap;
+
+    private float proximityThreshold = 0.15f;
 
     private void Awake()
     {
@@ -42,19 +47,19 @@ public class ChessBoard : MonoBehaviour
                 }
             }
         }
-        
+
     }
 
     private void Start()
     {
         InputMgr.Instance.StartOrCloseInputMgr(true);
 
-        
+        //checkPieceIsOverlap = StartCoroutine(CheckProximity());
     }
 
     private void Update()
     {
-
+        CheckProximity();
     }
 
     private void OnEnable()
@@ -70,6 +75,8 @@ public class ChessBoard : MonoBehaviour
         {
             InputMgr.Instance.OnScreenTapped -= OnScreenTapped;
         }
+
+        //StopCoroutine(CheckProximity());
     }
 
     /// <summary>
@@ -91,16 +98,14 @@ public class ChessBoard : MonoBehaviour
             ChessPiece piece = hit.collider.GetComponent<ChessPiece>();
             if (piece != null)
             {
-                Debug.Log("点击棋子: " + piece.name);
+                //Debug.Log("点击棋子: " + piece.name);
                 HandlePieceClick(piece);
             }
         }
         else //必须要检测点击的坐标是否处于棋盘内
         {
-            Debug.Log("点击棋盘");
+            //Debug.Log("点击棋盘");
             HandleBoardClick(worldPosition);
-
-
         }
     }
 
@@ -109,40 +114,43 @@ public class ChessBoard : MonoBehaviour
     /// </summary>
     private void HandlePieceClick(ChessPiece piece)
     {
-
-        if (selectedPiece != null)
-        {
-            // 如果已经有选中的棋子，取消选中
-            selectedPiece.Deselect();
-            ClearValidMovePositions(); // 清除之前的可移动位置
-        }
-
-        // 选中当前点击的棋子
-        selectedPiece = piece;
-        selectedPiece.Select();
         //不能点击AI的棋子
-        if (selectedPiece.color == ChessPiece.PieceFaction.Enemy)
+        if (piece.color == ChessPiece.PieceFaction.Enemy)
             return;
         //不能点击对方的棋子
         if (GameDataMgr.Instance.PlayerRound == 1)
         {
-            if (selectedPiece.color == ChessPiece.PieceFaction.Player2)
+            if (piece.color == ChessPiece.PieceFaction.Player2)
                 return;
         }
         if (GameDataMgr.Instance.PlayerRound == 2)
         {
-            if (selectedPiece.color == ChessPiece.PieceFaction.Player1)
+            if (piece.color == ChessPiece.PieceFaction.Player1)
                 return;
         }
-
-        //GameObjectMgr.Instance.playerRoleInfo = null;
-        //GameObjectMgr.Instance.nowRoleItem.SetSprite();
+        if (selectedPiece != null)
+        {
+            // 如果已经有选中的棋子，取消选中
+            selectedPiece.Deselect();
+            selectedPiece.ClearValidMovePositions(); // 清除之前的可移动位置
+        }
+        // 选中当前点击的棋子
+        selectedPiece = piece;
+        selectedPiece.Select();
 
         GameObjectMgr.Instance.isClickPiece = true;
         // 计算并显示可移动的空位置
-        CalculateValidMovePositions(selectedPiece);
-        ShowValidMovePositions();
-        
+        selectedPiece.CalculateValidMovePositions();
+
+        if (selectedPiece.validMovePositions.Count == 0)
+        {
+            selectedPiece.Deselect();
+            selectedPiece = null;
+            GameObjectMgr.Instance.isClickPiece = false;
+        }
+        else
+            selectedPiece.ShowValidMovePositions();
+
     }
 
     /// <summary>
@@ -154,7 +162,7 @@ public class ChessBoard : MonoBehaviour
         if (SceneManager.GetActiveScene().buildIndex == 1 || SceneManager.GetActiveScene().buildIndex == 3)
         {
             //如果玩家在UI面板选中了棋子的类型
-            if (GameObjectMgr.Instance.playerRoleInfo != null && GameDataMgr.Instance.playerMobility > 0 && IsPositionValid(worldPosition) && GameDataMgr.Instance.playCoin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0 && GetPiece(worldPosition) == null && GameObjectMgr.Instance.isClickPiece==false)
+            if (GameObjectMgr.Instance.playerRoleInfo != null && GameDataMgr.Instance.playerMobility > 0 && IsPositionValid(worldPosition) && GameDataMgr.Instance.playCoin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0 && GetPiece(worldPosition) == null && GameObjectMgr.Instance.isClickPiece == false && selectedPiece == null)
             {
                 ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
                 {
@@ -190,25 +198,9 @@ public class ChessBoard : MonoBehaviour
                     {
                         panel.ChangePlayerCoin(GameDataMgr.Instance.playCoin);
                     });
-                    
+
                 });
 
-
-                //EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
-
-                //GameObject pieceObj = PoolMgr.Instance.GetObj("playerpiece/" + GameObjectMgr.Instance.playerRoleInfo.f_icon);
-                //pieceObj.transform.position = ChessBoard.chessBoard.GetSnappedPosition(worldPosition);
-                //ChessPiece playerPiece = pieceObj.GetComponent<ChessPiece>();
-                ////设置棋子的阵营
-                //playerPiece.color = ChessPiece.PieceFaction.Player;
-                ////初始化棋子的数值
-                //playerPiece.SetData(GameObjectMgr.Instance.playerRoleInfo);
-                ////将棋子添加至容器中，便于管理
-                //GameObjectMgr.Instance.playerChess.Add(playerPiece);
-                //GameObjectMgr.Instance.allChessList.Add(playerPiece);
-
-                
-                
             }
             //如果玩家只是点击了棋盘,并且已经选中了棋子
             else
@@ -219,7 +211,7 @@ public class ChessBoard : MonoBehaviour
                     Vector2 targetPosition = (Vector2)worldPosition;
 
                     // 检查目标位置是否在可移动的空位置列表中
-                    foreach (Vector2 pos in validMovePositions)
+                    foreach (Vector2 pos in selectedPiece.validMovePositions)
                     {
                         if (Vector3.Distance(pos, targetPosition) <= 0.5f)
                         {
@@ -239,10 +231,9 @@ public class ChessBoard : MonoBehaviour
                         }
                         GameObjectMgr.Instance.isClickPiece = false;
                     }
-                    selectedPiece = null; // 清除选中的棋子
-
                     // 清除可移动位置
-                    ClearValidMovePositions();
+                    selectedPiece.ClearValidMovePositions();
+                    selectedPiece = null; // 清除选中的棋子
                 }
             }
         }
@@ -254,7 +245,7 @@ public class ChessBoard : MonoBehaviour
             if (GameObjectMgr.Instance.playerRoleInfo != null && IsPositionValid(worldPosition) && GetPiece(worldPosition) == null && GameObjectMgr.Instance.isClickPiece == false)
             {
                 //如果是玩家1的回合
-                if (GameDataMgr.Instance.PlayerRound == 1&& GameDataMgr.Instance.player1Coin - GameObjectMgr.Instance.playerRoleInfo.f_exp>=0 )
+                if (GameDataMgr.Instance.PlayerRound == 1 && GameDataMgr.Instance.player1Coin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0)
                 {
                     ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
                     {
@@ -276,11 +267,11 @@ public class ChessBoard : MonoBehaviour
                             panel.ChangePlayer1Coin(GameDataMgr.Instance.player1Coin);
                             panel.Player1EndOfDrop();
                         });
-                        
+
                     });
                     //EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
                 }
-                else if (GameDataMgr.Instance.PlayerRound == 2 && GameDataMgr.Instance.player2Coin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0 )//如果是玩家2的回合
+                else if (GameDataMgr.Instance.PlayerRound == 2 && GameDataMgr.Instance.player2Coin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0)//如果是玩家2的回合
                 {
                     ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
                     {
@@ -302,9 +293,9 @@ public class ChessBoard : MonoBehaviour
                             panel.ChangePlayer2Coin(GameDataMgr.Instance.player2Coin);
                             panel.Player2EndOfDrop();
                         });
-                        
+
                     });
-                   // EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
+                    // EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
                 }
             }
             else//如果玩家只是点击了棋盘,并且已经选中了棋子
@@ -315,26 +306,26 @@ public class ChessBoard : MonoBehaviour
                     Vector2 targetPosition = (Vector2)worldPosition;
 
                     // 检查目标位置是否在可移动的空位置列表中
-                    foreach (Vector2 pos in validMovePositions)
+                    foreach (Vector2 pos in selectedPiece.validMovePositions)
                     {
                         if (Vector3.Distance(pos, targetPosition) <= 0.5f)
                         {
                             // 移动棋子到目标位置
                             selectedPiece.MoveTo(pos);
                             selectedPiece.Deselect();
-                            
+
                             //EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
                         }
                         GameObjectMgr.Instance.isClickPiece = false;
                     }
-                    selectedPiece = null; // 清除选中的棋子
                     // 清除可移动位置
-                    ClearValidMovePositions();
+                    selectedPiece.ClearValidMovePositions();
+                    selectedPiece = null; // 清除选中的棋子                                        
                     //如果是玩家1的回合
                     if (GameDataMgr.Instance.PlayerRound == 1)
                     {
                         UIMgr.Instance.GetPanel<PvpPanel>(panel =>
-                        {                            
+                        {
                             panel.Player1EndOfDrop();
                         });
                     }
@@ -369,9 +360,9 @@ public class ChessBoard : MonoBehaviour
     {
         const float tolerance = 0.6f; // 1厘米容差
         return position.x >= boardOffset.x - tolerance
-               && position.x <= boardOffset.x + (boardWidth-1 * cellSize) + tolerance
+               && position.x <= boardOffset.x + (boardWidth - 1 * cellSize) + tolerance
                && position.y >= boardOffset.y - tolerance
-               && position.y <= boardOffset.y + (boardHeight-1 * cellSize) + tolerance;
+               && position.y <= boardOffset.y + (boardHeight - 1 * cellSize) + tolerance;
     }
 
     /// <summary>
@@ -399,7 +390,7 @@ public class ChessBoard : MonoBehaviour
             {
                 Vector2 neighbor = startPosition + dir;
                 ChessPiece neighborPiece = GetPiece(neighbor);
-                
+
                 if (IsPositionValid(neighbor))
                 {
                     if (neighborPiece == null) // 空位
@@ -426,7 +417,6 @@ public class ChessBoard : MonoBehaviour
             GameObject obj = Instantiate(point, position, Quaternion.identity);
             pointObjects.Add(obj);
         }
-
     }
 
     /// <summary>
@@ -454,6 +444,7 @@ public class ChessBoard : MonoBehaviour
         if (GameObjectMgr.Instance.allChessList == null)
             return null;
 
+        //改用距离检测
         foreach (var piece in GameObjectMgr.Instance.allChessList)
         {
             Vector2 piecePos = piece.transform.position;
@@ -463,6 +454,35 @@ public class ChessBoard : MonoBehaviour
                 return piece;
         }
         return null;
+    }
+
+    /// <summary>
+    /// 获取重叠的棋子
+    /// </summary>
+    public List<ChessPiece> GetPiecesOverlap(Vector2 position)
+    {
+        List<ChessPiece> resultPieces = new List<ChessPiece>();
+
+        //安卓平台上的物理检测有点问题，不能用
+        if (GameObjectMgr.Instance.allChessList == null)
+            return resultPieces;
+
+        //改用距离检测
+        foreach (var piece in GameObjectMgr.Instance.allChessList)
+        {
+            Vector2 piecePos = piece.transform.position;
+            float distanceSqr = (piecePos - position).sqrMagnitude;
+
+            if (distanceSqr <= 0.25f * 0.25f)
+            {
+                resultPieces.Add(piece);
+                if (resultPieces.Count >= 2)
+                {
+                    return resultPieces;
+                }
+            }
+        }
+        return resultPieces;
     }
 
     /// <summary>
@@ -477,7 +497,7 @@ public class ChessBoard : MonoBehaviour
             // 确保物理状态同步
             Physics2D.SyncTransforms();
 
-            // 获取棋子所在的层级，假设棋子在 "ChessPiece" 层
+            // 获取棋子所在的层级
             int layerMask = 1 << LayerMask.NameToLayer("ChessPiece");
 
             // 使用 OverlapCircleAll 来检测圆形碰撞体，增大检测半径
@@ -597,7 +617,10 @@ public class ChessBoard : MonoBehaviour
     {
         // 获取指定位置的棋子
         ChessPiece piece = GetPiece(position);
-        if (piece == null) 
+        if (piece == null)
+            return false;
+
+        if (GameObjectMgr.Instance.AIChess.Count == 81 || GameObjectMgr.Instance.playerChess.Count == 81)
             return false;
 
         // 获取连通区域
@@ -612,11 +635,11 @@ public class ChessBoard : MonoBehaviour
             foreach (Vector2 position2 in connectedGroup)
             {
                 ChessPiece piece1 = GetPiece(position2);
-                if (piece1!=null)
+                if (piece1 != null)
                     piece1.damageBar.gameObject.SetActive(true);
             }
             //Debug.Log("棋子或连通区域被围住");
-            return true;           
+            return true;
         }
         else
         {
@@ -745,13 +768,13 @@ public class ChessBoard : MonoBehaviour
             Vector2 randomPosition = emptyPositions[randomIndex];
 
             // 在随机位置落子
-            AIPlacePiece(randomPosition);            
+            AIPlacePiece(randomPosition);
         }
         else
         {
             //Debug.Log("棋盘已满，无法落子");
         }
-        
+
     }
 
     private void AIPlacePiece(Vector2 position)
@@ -760,32 +783,23 @@ public class ChessBoard : MonoBehaviour
             return;
 
         //随机选择棋子
-        
-        
-        GameObjectMgr.Instance.AIRoleInfo = nowLevelRole[Random.Range(0, nowLevelRole.Count)];
 
-        ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", GameObjectMgr.Instance.AIRoleInfo.f_icon, (obj) =>
+
+        T_Role roleInfo = nowLevelRole[Random.Range(0, nowLevelRole.Count)];
+
+        ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", roleInfo.f_icon, (obj) =>
         {
             ChessPiece aiPiece = GameObject.Instantiate(obj, ChessBoard.chessBoard.GetSnappedPosition(position), Quaternion.identity).GetComponent<ChessPiece>();
             //设置棋子的阵营
             aiPiece.color = ChessPiece.PieceFaction.Enemy;
             //初始化棋子的数值
-            aiPiece.SetData(GameObjectMgr.Instance.AIRoleInfo);
+            aiPiece.SetData(roleInfo);
             //将棋子添加至容器中，便于管理
             GameObjectMgr.Instance.AIChess.Add(aiPiece);
             GameObjectMgr.Instance.allChessList.Add(aiPiece);
         });
 
-        //GameObject pieceObj = PoolMgr.Instance.GetObj("enemypiece/" + GameObjectMgr.Instance.AIRoleInfo.f_icon);
-        //pieceObj.transform.position = ChessBoard.chessBoard.GetSnappedPosition(position);
-        //ChessPiece aiPiece = pieceObj.GetComponent<ChessPiece>();
-        ////设置棋子的阵营
-        //aiPiece.color = ChessPiece.PieceFaction.Enemy;
-        ////初始化棋子的数值
-        //aiPiece.SetData(GameObjectMgr.Instance.AIRoleInfo);
-        ////将棋子添加至容器中，便于管理
-        //GameObjectMgr.Instance.AIChess.Add(aiPiece);
-        //GameObjectMgr.Instance.allChessList.Add(aiPiece);
+        
 
     }
 
@@ -798,9 +812,9 @@ public class ChessBoard : MonoBehaviour
         }
     }
 
-    public void TrainPlacePlayerPiece(int x,int y)
+    public void TrainPlacePlayerPiece(int x, int y)
     {
-        Vector2 position = new Vector2(boardOffset.x + x * cellSize,boardOffset.y + y * cellSize);
+        Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
 
         GameObjectMgr.Instance.playerRoleInfo = GameObjectMgr.Instance.AllRoleList[0];
         ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
@@ -810,7 +824,7 @@ public class ChessBoard : MonoBehaviour
             playerPiece.color = ChessPiece.PieceFaction.Player;
             //初始化棋子的数值
             playerPiece.SetData(GameObjectMgr.Instance.playerRoleInfo);
-            
+
             //将棋子添加至容器中，便于管理
             GameObjectMgr.Instance.playerChess.Add(playerPiece);
             GameObjectMgr.Instance.allChessList.Add(playerPiece);
@@ -876,12 +890,136 @@ public class ChessBoard : MonoBehaviour
                 playerPiece.color = ChessPiece.PieceFaction.Player;
                 //初始化棋子的数值
                 playerPiece.SetData(topInfo);
-                
+
                 //将棋子添加至容器中，便于管理
                 GameObjectMgr.Instance.playerChess.Add(playerPiece);
                 GameObjectMgr.Instance.allChessList.Add(playerPiece);
-               
+
+                UIMgr.Instance.GetPanel<GamePanel>(panel =>
+                {
+                    panel.ChangeTip(topInfo.f_name);
+                });
             });
+
+
+            //特效
+            ABResMgr.Instance.LoadResAsync<GameObject>("effect", "下落特效", (obj) =>
+            {
+                Instantiate(obj, GetSnappedPosition(randomPosition), Quaternion.identity);
+            });
+        }
+    }
+
+    /// <summary>
+    /// 当棋盘满了，看广告删除10个棋子
+    /// </summary>
+    public void DeleteTenAIPiece()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            ChessPiece piece = GameObjectMgr.Instance.AIChess[UnityEngine.Random.Range(0, GameObjectMgr.Instance.AIChess.Count)];
+            GameObjectMgr.Instance.AIChess.Remove(piece);
+            GameObjectMgr.Instance.allChessList.Remove(piece);
+            Destroy(piece.gameObject);
+        }
+        RandomPlaceTopPiece();
+        GameLevelMgr.Instance.SetRelifeIsShow();
+    }
+
+    /// <summary>
+    /// 检测可移动点是否已被棋子占满
+    /// </summary>
+    private bool CheckVaildPosIsFull(List<Vector2> vector2s)
+    {
+        bool isFull = true;
+
+        foreach (Vector2 pos in vector2s)
+        {
+            ChessPiece piece = GetPiece(pos);
+            if (piece == null)
+            {
+                isFull = false;
+                break;
+            }
+        }
+        return isFull;
+    }
+
+    private IEnumerator CheckPieceIsOverlap()
+    {
+        while (true)
+        {
+            // 遍历棋盘网格，找到所有空位置
+            for (int x = 0; x < boardWidth; x++)
+            {
+                for (int y = 0; y < boardHeight; y++)
+                {
+                    Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
+                    List<ChessPiece> pieces = GetPiecesOverlap(position);
+                    if (pieces.Count >= 2)
+                    {
+                        foreach (ChessPiece piece in pieces)
+                        {
+                            switch (piece.color)
+                            {
+                                case PieceFaction.Player:
+                                    GameObjectMgr.Instance.playerChess.Remove(piece);
+                                    break;
+                                case PieceFaction.Enemy:
+                                    GameObjectMgr.Instance.AIChess.Remove(piece);
+                                    break;
+                            }
+                            GameObjectMgr.Instance.allChessList.Remove(piece);
+                            Destroy(piece.gameObject);
+                        }
+                    }
+                }
+            }
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    public void CheckProximity()
+    {
+
+        for (int i = 0; i < GameObjectMgr.Instance.allChessList.Count - 1; i++)
+        {
+            for (int j = i + 1; j < GameObjectMgr.Instance.allChessList.Count; j++)
+            {
+                Vector2 pos1 = GameObjectMgr.Instance.allChessList[i].transform.position;
+                Vector2 pos2 = GameObjectMgr.Instance.allChessList[j].transform.position;
+                Vector2 diff = pos1 - pos2;
+                float distanceSqr = diff.x * diff.x + diff.y * diff.y;
+                float proximityThresholdSqr = proximityThreshold * proximityThreshold;
+                if (distanceSqr <= proximityThresholdSqr)
+                {
+                    // 这里放置距离满足条件时执行的代码
+                    ChangePiecePos(GameObjectMgr.Instance.allChessList[i]);
+                    ChangePiecePos(GameObjectMgr.Instance.allChessList[j]);
+                }                
+            }
+        }
+
+
+
+    }
+
+    /// <summary>
+    /// 改变重叠棋子的位置
+    /// </summary>
+    /// <param name="piece"></param>
+    private void ChangePiecePos(ChessPiece piece)
+    {
+        // 遍历棋盘网格，找到所有空位置
+        for (int x = 0; x < boardWidth; x++)
+        {
+            for (int y = 0; y < boardHeight; y++)
+            {
+                Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
+
+                if(GetPiece(position)==null)
+                    piece.MoveTo(position);
+            }
         }
     }
 }

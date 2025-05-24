@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -52,6 +54,10 @@ public class ChessPiece : MonoBehaviour
     // 标记是否需要检查包围状态
     public bool needCheckSurrounding = false;
 
+    public List<Vector2> validMovePositions = new List<Vector2>(); // 可移动的空位置
+    //用于储存可视化移动点的列表
+    private List<GameObject> pointObjects = new List<GameObject>();
+
     private void Awake()
     {
         // 缓存单例实例
@@ -63,10 +69,6 @@ public class ChessPiece : MonoBehaviour
 
     private void Start()
     {
-        //gridPosition = new Vector2
-        //    (Mathf.RoundToInt((transform.position.x - chessBoardInstance.boardOffset.x) / chessBoardInstance.cellSize),
-        //     Mathf.RoundToInt((transform.position.y - chessBoardInstance.boardOffset.y) / chessBoardInstance.cellSize));
-
         damageBar.SetActive(false);
         hpBarSize = hpBar.transform.localScale;
         // 修改为通过 MonoMgr 启动协程
@@ -96,15 +98,15 @@ public class ChessPiece : MonoBehaviour
     /// 被围携程
     /// </summary>
     /// <returns></returns>
-
-
     private IEnumerator CheckSurrounding()
     {
         while (true)
         {
-            bool isSurrounded = chessBoardInstance.CheckIfSurrounded(transform.position);
+            isSurrounded = chessBoardInstance.CheckIfSurrounded(transform.position);
             damageBar.SetActive(isSurrounded);
-            yield return new WaitForSeconds(0.01f);
+            if(isSurrounded)
+                ClearValidMovePositions();
+            yield return new WaitForSeconds(0.05f);
         }
     }
 
@@ -151,12 +153,9 @@ public class ChessPiece : MonoBehaviour
         if (chessBoardInstance.GetPiece(targetPosition) == null)
         {
             MusicMgr.Instance.PlaySound("史莱姆落子");
-            // 清空技能条
-            // this.skillBar.transform.localScale = new Vector3(0, 1, 1);
+            
             transform.position = targetPosition;
-            //Debug.Log("棋子移动到: " + targetPosition);
-            // EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
-            needCheckSurrounding = true;
+            
         }
     }
 
@@ -165,6 +164,8 @@ public class ChessPiece : MonoBehaviour
     /// </summary>
     public void Attack()
     {
+        if (this.color==PieceFaction.Enemy && GameObjectMgr.Instance.playerChess.Count == 0)
+            return;
 
         // 选择攻击的敌人棋子
         ChessPiece enemyPiece = null;
@@ -190,7 +191,7 @@ public class ChessPiece : MonoBehaviour
                     {
                         Vector2 piecePos = piece.transform.position;
                         float distanceSqr = (piecePos - vector).sqrMagnitude;
-                        if (distanceSqr <= 0.05f * 0.05f)
+                        if (distanceSqr <= 0.15f * 0.15f)
                             chessPieces.Add(piece);
                     }
                     break;
@@ -199,7 +200,7 @@ public class ChessPiece : MonoBehaviour
                     {
                         Vector2 piecePos = piece.transform.position;
                         float distanceSqr = (piecePos - vector).sqrMagnitude;
-                        if (distanceSqr <= 0.05f * 0.05f)
+                        if (distanceSqr <= 0.15f * 0.15f)
                             chessPieces.Add(piece);
                     }
                     break;
@@ -208,7 +209,7 @@ public class ChessPiece : MonoBehaviour
                     {
                         Vector2 piecePos = piece.transform.position;
                         float distanceSqr = (piecePos - vector).sqrMagnitude;
-                        if (distanceSqr <= 0.05f * 0.05f)
+                        if (distanceSqr <= 0.15f * 0.15f)
                             chessPieces.Add(piece);
                     }
                     break;
@@ -217,7 +218,7 @@ public class ChessPiece : MonoBehaviour
                     {
                         Vector2 piecePos = piece.transform.position;
                         float distanceSqr = (piecePos - vector).sqrMagnitude;
-                        if (distanceSqr <= 0.05f * 0.05f)
+                        if (distanceSqr <= 0.15f * 0.15f)
                             chessPieces.Add(piece);
                     }
                     break;
@@ -287,35 +288,7 @@ public class ChessPiece : MonoBehaviour
                 }
 
                 DelayDeductionHp(enemyPiece);
-                //// 如果生命值为 0，就处理死亡逻辑
-                //if (enemyPiece.hp <= 0)
-                //{
-                //    enemyPiece.hp = 0;
-
-                //    switch (enemyPiece.color)
-                //    {
-                //        case PieceFaction.Player:
-                //            playerChess.Remove(enemyPiece);
-                //            break;
-                //        case PieceFaction.Enemy:
-                //            aiChess.Remove(enemyPiece);
-                //            gameAchieveMgrInstance.enemyCount++;
-                //            //gameAchieveMgrInstance.CompleteAchievement(4);
-                //            break;
-                //        case PieceFaction.Player1:
-                //            player1List.Remove(enemyPiece);
-                //            break;
-                //        case PieceFaction.Player2:
-                //            player2List.Remove(enemyPiece);
-                //            break;
-                //    }
-
-                //    gameObjectMgrInstance.allChessList.Remove(enemyPiece);
-                //    //MarkForDestroy(enemyPiece.gameObject);
-                //    //Destroy(enemyPiece.gameObject);
-                //    DestroyImmediate(enemyPiece.gameObject);
-                //    //PoolMgr.Instance.PushObj(enemyPiece.gameObject);
-                //}
+                
 
             }
         }
@@ -351,11 +324,11 @@ public class ChessPiece : MonoBehaviour
         objectsToDestroy.Add(obj);
     }
 
-    private void DelayChangeBarX(ChessPiece piece)
-    {
-        piece.hpBar.transform.localScale = new Vector3(hpScaleX * hp / roleProperty.f_hp, 1, 1);
-    }
-
+    
+    /// <summary>
+    /// 修改血条
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator ChangeHpBar()
     {
         while (true)
@@ -367,13 +340,12 @@ public class ChessPiece : MonoBehaviour
         }
     }
 
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        // 简单的处理方式，将物体移开
-        Vector2 direction = (transform.position - collision.transform.position).normalized;
-        transform.Translate(direction);
-    }
+    
 
+    /// <summary>
+    /// 扣血
+    /// </summary>
+    /// <param name="enemyPiece"></param>
     private void DelayDeductionHp(ChessPiece enemyPiece)
     {
 
@@ -408,16 +380,83 @@ public class ChessPiece : MonoBehaviour
                 }
 
                 gameObjectMgrInstance.allChessList.Remove(enemyPiece);
-                //MarkForDestroy(enemyPiece.gameObject);
-                //Destroy(enemyPiece.gameObject);
-                DestroyImmediate(enemyPiece.gameObject);
-                //PoolMgr.Instance.PushObj(enemyPiece.gameObject);
-
-                if (ChessBoard.chessBoard.validMovePositions.Count!=0)
-                    ChessBoard.chessBoard.ClearValidMovePositions();
+                enemyPiece.ClearValidMovePositions();
+                DestroyImmediate(enemyPiece.gameObject);                
+                GameObjectMgr.Instance.isClickPiece = false;
             }
 
         }
 
+    }
+
+   
+
+    /// <summary>
+    /// 显示可移动的空位置
+    /// </summary>
+    public void ShowValidMovePositions()
+    {
+        if (validMovePositions.Count == 0)
+            return;
+        foreach (Vector2 position in validMovePositions)
+        {
+            Debug.Log($"可移动位置: {position}");
+            // 在这里可以添加可视化逻辑，例如显示高亮方块
+            GameObject obj = Instantiate(ChessBoard.chessBoard.point, position, Quaternion.identity);
+            pointObjects.Add(obj);
+        }
+    }
+
+    /// <summary>
+    /// 清除可移动的空位置
+    /// </summary>
+    public void ClearValidMovePositions()
+    {
+        validMovePositions.Clear();
+        // 在这里可以清除可视化逻辑，例如隐藏高亮方块
+        foreach (GameObject obj in pointObjects)
+        {
+            Destroy(obj);
+        }
+        pointObjects.Clear();
+    }
+
+    /// <summary>
+    /// 计算棋子可移动的空位置
+    /// </summary>
+    public void CalculateValidMovePositions()
+    {
+        validMovePositions.Clear();
+
+        Vector2 startPosition = (Vector2)transform.position;
+        int moveRange = roleProperty.f_move;
+
+        while (moveRange > 0)
+        {
+            // 检查上下左右四个方向
+            Vector2[] directions = new Vector2[]
+            {
+                    new Vector2(0, ChessBoard.chessBoard.cellSize * moveRange),  // 上
+                    new Vector2(0, -ChessBoard.chessBoard.cellSize * moveRange), // 下
+                    new Vector2(-ChessBoard.chessBoard.cellSize * moveRange, 0), // 左
+                    new Vector2(ChessBoard.chessBoard.cellSize * moveRange, 0)   // 右
+            };
+
+            foreach (Vector2 dir in directions)
+            {
+                Vector2 neighbor = startPosition + dir;
+                ChessPiece neighborPiece = ChessBoard.chessBoard.GetPiece(neighbor);
+
+                if (ChessBoard.chessBoard.IsPositionValid(neighbor))
+                {
+                    if (neighborPiece == null) // 空位
+                    {
+                        validMovePositions.Add(neighbor);
+                    }
+                }
+            }
+
+            moveRange--; // 每搜索一层，moveRange 减 1
+        }
     }
 }

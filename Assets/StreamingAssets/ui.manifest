@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1240826617
+CRC: 195573732
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: fd1c6b9ab52254b05ed99c89cea6ee66
+    Hash: 71ee8fe26edddb8cfed6a838a99df561
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 72eec25027c0b3457330dba6ac3f5755
+    Hash: 8371d0383f648e0be01d7480d5013fb8
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: fd1c6b9ab52254b05ed99c89cea6ee66
+    Hash: 71ee8fe26edddb8cfed6a838a99df561
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -78,6 +78,8 @@ ClassTypes:
   Script: {fileID: 11500000, guid: 35cfc3fda44b83045809d68de3a7a44d, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 54693b9fe4d66b241a112dd1a1c1cc84, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: fedb5a7a89f1efe40b4c295960b71e10, type: 3}
 - Class: 115
   Script: {instanceID: 0}
 - Class: 128
@@ -128,6 +130,7 @@ Assets:
 - Assets/Editor/ArtRes/ui/AchievePanel.prefab
 - Assets/Editor/ArtRes/ui/BuyPanel.prefab
 - Assets/Editor/ArtRes/ui/SettingPanel.prefab
+- Assets/Editor/ArtRes/ui/ReLifePanel.prefab
 - Assets/Editor/ArtRes/ui/GamePanel.prefab
 - Assets/Editor/ArtRes/ui/InputPanel.prefab
 - Assets/Editor/ArtRes/ui/ChooseLevelPanel.prefab

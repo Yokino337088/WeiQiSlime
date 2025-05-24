@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3762386252
+CRC: 757859137
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 4651a55f23b57b2b5708812d7b2b4be7
+    Hash: 896b0124cd111cc0390f7dabfa8aba5c
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 64e2031019970e6e81b31f111684fbc7
+    Hash: 2456480987b78bb507c91733de619293
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 4651a55f23b57b2b5708812d7b2b4be7
+    Hash: 896b0124cd111cc0390f7dabfa8aba5c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -48,60 +48,60 @@ SerializeReferenceClassIdentifiers:
 - AssemblyName: Assembly-CSharp
   ClassName: RoleProperty
 Assets:
+- "Assets/Resources/playerpiece/\u91CD\u5F293.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u76FE\u62182.prefab"
-- "Assets/Resources/playerpiece/\u76FE\u62182.prefab"
+- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E082.prefab"
 - "Assets/Resources/playerpiece/\u5251\u58EB2.prefab"
+- "Assets/Resources/playerpiece/\u5F13\u7BAD1.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u5F13\u7BAD2.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E081.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u52513.prefab"
-- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E081.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u5F291.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u52511.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u5F13\u7BAD1.prefab"
-- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E081.prefab"
-- "Assets/Resources/playerpiece/\u91CD\u5F293.prefab"
+- "Assets/Resources/playerpiece/\u523A\u5BA23.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB3.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E083.prefab"
-- "Assets/Resources/playerpiece/\u523A\u5BA23.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u706B\u6CD5\u5E081.prefab"
-- "Assets/Editor/ArtRes/playerpiece/\u7267\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u523A\u5BA21.prefab"
 - "Assets/Resources/playerpiece/\u76FE\u62183.prefab"
-- "Assets/Resources/playerpiece/\u91CD\u5F291.prefab"
-- "Assets/Resources/playerpiece/\u840C\u65B0.prefab"
+- "Assets/Resources/playerpiece/\u523A\u5BA22.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u7267\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u52511.prefab"
 - "Assets/Resources/playerpiece/\u5F13\u7BAD2.prefab"
-- "Assets/Resources/playerpiece/\u7267\u5E083.prefab"
-- "Assets/Resources/playerpiece/\u7267\u5E081.prefab"
-- "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB2.prefab"
+- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E082.prefab"
 - "Assets/Resources/playerpiece/\u5F13\u7BAD3.prefab"
-- "Assets/Resources/playerpiece/\u91CD\u52512.prefab"
-- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u5251\u58EB3.prefab"
+- "Assets/Resources/playerpiece/\u76FE\u62182.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB2.prefab"
+- "Assets/Resources/playerpiece/\u7267\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u5251\u58EB1.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u76FE\u62181.prefab"
+- "Assets/Resources/playerpiece/\u840C\u65B0.prefab"
+- "Assets/Resources/playerpiece/\u7267\u5E081.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u7267\u5E082.prefab"
+- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E081.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u52512.prefab"
-- "Assets/Resources/playerpiece/\u5F13\u7BAD1.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u7267\u5E081.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E082.prefab"
+- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u76FE\u62181.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F292.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA22.prefab"
-- "Assets/Resources/playerpiece/\u5251\u58EB3.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u76FE\u62183.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u7267\u5E082.prefab"
-- "Assets/Resources/playerpiece/\u91CD\u52513.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u706B\u6CD5\u5E082.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u5251\u58EB1.prefab"
-- "Assets/Resources/playerpiece/\u5251\u58EB1.prefab"
-- "Assets/Resources/playerpiece/\u91CD\u5F292.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u840C\u65B0.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F291.prefab"
-- "Assets/Resources/playerpiece/\u76FE\u62181.prefab"
-- "Assets/Resources/playerpiece/\u91CD\u52511.prefab"
-- "Assets/Resources/playerpiece/\u7267\u5E082.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA21.prefab"
-- "Assets/Resources/playerpiece/\u523A\u5BA21.prefab"
+- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E083.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F293.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u5F13\u7BAD3.prefab"
-- "Assets/Resources/playerpiece/\u523A\u5BA22.prefab"
-- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E081.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA23.prefab"
-- "Assets/Resources/playerpiece/\u706B\u6CD5\u5E082.prefab"
-- "Assets/Resources/playerpiece/\u6C34\u6CD5\u5E082.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u52513.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u52512.prefab"
+- "Assets/Resources/playerpiece/\u91CD\u5F292.prefab"
 Dependencies: []

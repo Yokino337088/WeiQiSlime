@@ -30,6 +30,7 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
     public LevelItem nowSelectItem;
 
     private bool isCheck = true;
+    private bool isShow = true;
 
     private void Update()
     {
@@ -46,6 +47,9 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
         {
             CheckTrain();
         }
+
+        if (SceneManager.GetActiveScene().buildIndex == 1 && SceneTimeMgr.Instance.GetCurrentSceneTime() < 580 && isShow)
+            CheckAIPieceIsFull();
     }
 
     /// <summary>
@@ -100,7 +104,7 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
     /// </summary>
     private void CheckWinOrFail()
     {
-        if (GameDataMgr.Instance.AICoin < 10 && GameObjectMgr.Instance.AIChess.Count == 0)
+        if (GameDataMgr.Instance.AICoin <= 10 && GameObjectMgr.Instance.AIChess.Count == 0)
         {
             if (warList.Contains(nowLevelInfo))
             {
@@ -112,8 +116,8 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
             else if (adventureList.Contains(nowLevelInfo))
             {
                 int index = adventureList.IndexOf(nowLevelInfo) + 1;
-                if (index >= warList.Count)
-                    index = warList.Count - 1;
+                if (index >= adventureList.Count)
+                    index = adventureList.Count - 1;
                 adventureList[index].isShow = true;
             }
 
@@ -143,8 +147,7 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
                 panel.ChangeSpend(GameDataMgr.Instance.playerSpend);                
                 panel.ChangeRecord(GameDataMgr.Instance.MinLevelSpend);
             });
-            //更新关卡成就
-            GameAchieveMgr.Instance.CompleteAchievement(nowLevelInfo.f_gkid);
+            
             
             isCheck = false;
         }
@@ -204,6 +207,39 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
                 GameAchieveMgr.Instance.CompleteAchievement(nowLevelInfo.f_gkid);
                 isCheck = false;
             }
+        }
+
+        if (GameObjectMgr.Instance.playerChess.Count >= 81)
+        {
+            if (warList.Contains(nowLevelInfo))
+            {
+                int index = warList.IndexOf(nowLevelInfo) + 1;
+                if (index >= warList.Count)
+                    index = warList.Count - 1;
+                warList[index].isShow = true;
+            }
+            else if (adventureList.Contains(nowLevelInfo))
+            {
+                int index = adventureList.IndexOf(nowLevelInfo) + 1;
+                if (index >= adventureList.Count)
+                    index = adventureList.Count - 1;
+                adventureList[index].isShow = true;
+            }
+
+            SaveLevelData();
+            //玩家获胜的逻辑
+            UIMgr.Instance.ShowPanel<SettlementPanel>(E_UILayer.Top, (panel) =>
+            {
+                panel.ChangeTitle("胜利");
+                panel.ChangeReward(nowLevelInfo.f_gktgjl);
+                panel.ChangeSpend(GameDataMgr.Instance.playerSpend);
+                panel.ChangeRecord(GameDataMgr.Instance.MinLevelSpend);
+            });
+
+            //更新关卡成就
+            GameAchieveMgr.Instance.CompleteAchievement(nowLevelInfo.f_gkid);
+
+            isCheck = false;
         }
         
     }
@@ -304,4 +340,29 @@ public class GameLevelMgr : SingletonAutoMono<GameLevelMgr>
             });
         }
     }
+
+    /// <summary>
+    /// 检测敌人棋子是否占满
+    /// </summary>
+    private void CheckAIPieceIsFull()
+    {
+        if (GameObjectMgr.Instance.AIChess.Count >= 81)
+        {
+            UIMgr.Instance.ShowPanel<ReLifePanel>(E_UILayer.Bottom);
+            isShow = false;
+        }
+        else
+        {
+            isShow = true;
+            return;
+        }
+
+    }
+
+    public void SetRelifeIsShow()
+    {
+        isShow = true;
+    }
+
+
 }

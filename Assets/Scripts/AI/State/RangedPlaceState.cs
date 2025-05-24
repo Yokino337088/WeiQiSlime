@@ -78,6 +78,74 @@ public class RangedPlaceState : BaseState
         return count;
     }
 
+    /// <summary>
+    /// 寻找玩家棋子包围点落子
+    /// </summary>
+    /// <returns></returns>
+    private Vector2 FindEnemySurroundPosition()
+    {
+        // 检查玩家棋子容器是否为空
+        if (GameObjectMgr.Instance.playerChess == null || GameObjectMgr.Instance.playerChess.Count == 0)
+        {
+            //Debug.LogWarning("玩家棋子容器为空");
+            return Vector2.zero;
+        }
+
+        // 初始化存储有效位置的列表
+        List<Vector2> randomPoses = new List<Vector2>();
+
+        // 遍历装载玩家棋子的容器
+        foreach (ChessPiece piece in GameObjectMgr.Instance.playerChess)
+        {
+            // 检查 ChessPiece 对象是否已被销毁
+            if (piece == null || piece.Equals(null))
+            {
+                //Debug.LogWarning("发现已被销毁的棋子，跳过");
+                continue; // 跳过已被销毁的对象
+            }
+
+            // 检查 ChessBoard 是否为空
+            if (ChessBoard.chessBoard == null)
+            {
+                //Debug.LogError("ChessBoard 未初始化");
+                return Vector2.zero;
+            }
+
+            // 检查上下左右四个方向
+            Vector2[] directions = new Vector2[]
+            {
+            new Vector2(0, ChessBoard.chessBoard.cellSize),  // 上
+            new Vector2(0, -ChessBoard.chessBoard.cellSize), // 下
+            new Vector2(-ChessBoard.chessBoard.cellSize, 0), // 左
+            new Vector2(ChessBoard.chessBoard.cellSize, 0)   // 右
+            };
+
+            foreach (Vector2 dir in directions)
+            {
+                // 计算相邻位置
+                Vector2 neighbor = (Vector2)piece.transform.position + dir;
+
+                // 检查位置是否有效
+                if (ChessBoard.chessBoard.IsPositionValid(neighbor) && ChessBoard.chessBoard.GetPiece(neighbor) == null && neighbor.x < 4)
+                {
+                    // 将有效位置添加到列表中
+                    randomPoses.Add(neighbor);
+                }
+            }
+        }
+
+        // 检查是否有有效的位置
+        if (randomPoses.Count == 0)
+        {
+            //Debug.LogWarning("没有找到玩家包围点");
+            return Vector2.zero; // 如果没有有效位置，返回默认值
+        }
+
+        // 随机返回一个有效位置
+        int index = Random.Range(0, randomPoses.Count);
+        return randomPoses[index];
+    }
+
     private void PlacePiece(Vector2 position)
     {
         // 落子逻辑

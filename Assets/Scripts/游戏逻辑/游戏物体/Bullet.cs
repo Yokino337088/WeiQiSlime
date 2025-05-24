@@ -101,15 +101,7 @@ public class Bullet : MonoBehaviour
         textMeshPro.color = textColor;
     }
 
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    ChessPiece checkPiece = collision.GetComponent<ChessPiece>();
-    //    // 如果碰到了指定目标
-    //    if (checkPiece == targetPiece)
-    //    {
-    //        ReturnToPool();
-    //    }
-    //}
+    
 
     private void PushToPool()
     {

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SettingPanel : BasePanel
 {
@@ -35,12 +36,20 @@ public class SettingPanel : BasePanel
             case "togMusic":
                 //当没有被选中时，关闭背景音乐
                 if (value)
-                    MusicMgr.Instance.PlayBKMusic("rememberMe");
+                {
+                    if(SceneManager.GetActiveScene().buildIndex == 0)
+                        MusicMgr.Instance.PlayBKMusic("rememberMe");
+                    else
+                        MusicMgr.Instance.PlayBKMusic("Crossroads");
+                }                   
                 else
                     MusicMgr.Instance.StopBKMusic();
                 break;
             case "togSound":
-                MusicMgr.Instance.PlayOrPauseSound(value);  
+                if (value)
+                    MusicMgr.Instance.ChangeSoundValue(0.5f);
+                else
+                    MusicMgr.Instance.ChangeSoundValue(0f);
                 break;
         }
     }

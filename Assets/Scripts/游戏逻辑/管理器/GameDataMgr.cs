@@ -28,9 +28,9 @@ public class GameDataMgr : SingletonAutoMono<GameDataMgr>
     public int player2Coin;
 
     //玩家行动力
-    public int playerMobility = 3;
+    public int playerMobility = 0;
     //敌人行动力
-    public int enemyMobility = 3;
+    public int enemyMobility = 0;
 
     /// <summary>
     /// 玩家在对局中花费的金币数

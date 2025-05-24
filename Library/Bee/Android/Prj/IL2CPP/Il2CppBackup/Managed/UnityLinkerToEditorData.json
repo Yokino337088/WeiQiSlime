@@ -807,14 +807,6 @@
         "name": "Physics2D",
         "dependencies": [
           {
-            "name": "BoxCollider2D",
-            "scenes": [
-              "Assets/Scenes/\u5F00\u59CB\u573A\u666F.unity"
-            ],
-            "dependencyType": 0,
-            "icon": null
-          },
-          {
             "name": "CircleCollider2D",
             "scenes": [
               "Assets/Scenes/\u5F00\u59CB\u573A\u666F.unity"
@@ -832,14 +824,6 @@
             "name": "Physics2DSettings",
             "scenes": [],
             "dependencyType": 1,
-            "icon": null
-          },
-          {
-            "name": "Rigidbody2D",
-            "scenes": [
-              "Assets/Scenes/\u5F00\u59CB\u573A\u666F.unity"
-            ],
-            "dependencyType": 0,
             "icon": null
           }
         ]

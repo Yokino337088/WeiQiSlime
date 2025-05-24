@@ -129,6 +129,7 @@ public class ChooseLevelPanel : BasePanel
                         GameLevelMgr.Instance.SetCheck();
                     });
                 }
+                
                 break;
             case "btnSetting":
                 MusicMgr.Instance.PlaySound("°´Å¥µã»÷");
@@ -160,8 +161,7 @@ public class ChooseLevelPanel : BasePanel
     private void AddItem2Content(List<T_Level> lists)
     {
         foreach (T_Level levelInfo in lists)
-        {
-            
+        {            
             if (levelInfo.isShow)
             {
                 ABResMgr.Instance.LoadResAsync<GameObject>("object", "levelItem", (obj) =>
@@ -171,8 +171,7 @@ public class ChooseLevelPanel : BasePanel
                     levelItem.InitInfo(levelInfo);
                     levelItems.Add(levelItem);
                 });
-            }
-           
+            }           
         }
     }
 }

@@ -1,0 +1,42 @@
+ManifestFileVersion: 0
+CRC: 3563534764
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 5a509bb0c6b0d6561eb9bc59a5f48c2a
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 91487350664aaf386ec82136c7aa03ed
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 5a509bb0c6b0d6561eb9bc59a5f48c2a
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 91
+  Script: {instanceID: 0}
+- Class: 95
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: a6a25060a6838224d86a20f3ecedaa08, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- "Assets/Editor/ArtRes/Effect/\u4E0B\u843D\u7279\u6548.prefab"
+Dependencies: []

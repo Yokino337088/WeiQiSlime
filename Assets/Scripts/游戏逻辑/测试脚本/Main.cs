@@ -6,6 +6,7 @@ public class Main : MonoBehaviour
 {
     private const string firstLaunchKey = "IsFirstLaunch";
     
+    
     void Start()
     {
         print(Application.persistentDataPath + "/Data/");
@@ -16,13 +17,12 @@ public class Main : MonoBehaviour
         });
 
         MusicMgr.Instance.PlayBKMusic("rememberMe");
-        BinaryDataMgr.Instance.InitData();
-        //BinaryDataMgr.Instance.VerifyTableIntegrity<T_RoleContainer>();
-        //BinaryDataMgr.Instance.VerifyTableIntegrity<T_LevelContainer>();
-        //BinaryDataMgr.Instance.VerifyTableIntegrity<T_AchieveContainer>();
 
-        
-            
+        if (!GameDataMgr.Instance.isload)
+        {
+            BinaryDataMgr.Instance.InitData();
+        }
+                                        
         if (!PlayerPrefs.HasKey(firstLaunchKey))
         {
             // 这是第一次打开游戏

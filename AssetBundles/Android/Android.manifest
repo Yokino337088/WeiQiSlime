@@ -1,5 +1,5 @@
 ManifestFileVersion: 0
-CRC: 2704294894
+CRC: 1256075925
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
@@ -19,4 +19,7 @@ AssetBundleManifest:
       Dependencies: {}
     Info_5:
       Name: enemypiece
+      Dependencies: {}
+    Info_6:
+      Name: effect
       Dependencies: {}

@@ -2,6 +2,7 @@ using AnyThinkAds.Api;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
@@ -121,11 +122,14 @@ public class AdvertisementMgr : SingletonMono<AdvertisementMgr>
             }
             else if (SceneManager.GetActiveScene().buildIndex == 1)
             {
-                ChessBoard.chessBoard.RandomPlaceTopPiece();
+                if (GameObjectMgr.Instance.AIChess.Count < 81)
+                    ChessBoard.chessBoard.RandomPlaceTopPiece();
+                else
+                    ChessBoard.chessBoard.DeleteTenAIPiece();
             }
             GameAchieveMgr.Instance.CompleteAchievement(7);
             GameAchieveMgr.Instance.SaveAchieveData();
-            
+            UIMgr.Instance.HidePanel<ReLifePanel>();
         }
         catch (Exception ex)
         {

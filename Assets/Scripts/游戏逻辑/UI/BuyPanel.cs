@@ -43,11 +43,11 @@ public class BuyPanel : BasePanel
                 }
                 else
                 {
-                    if (GameDataMgr.Instance.playCoin >= roleInfo.f_exp * 10)
+                    if (GameDataMgr.Instance.playCoin >= roleInfo.f_exp * 10*roleInfo.f_level)
                     {
                         roleInfo.isUnlock = true;
                         //减少金币
-                        GameDataMgr.Instance.playCoin -= roleInfo.f_exp * 10;
+                        GameDataMgr.Instance.playCoin -= roleInfo.f_exp * 10 * roleInfo.f_level;
                         //修改玩家金币的UI逻辑
                         UIMgr.Instance.GetPanel<BeginPanel>((panel) =>
                         {
@@ -87,7 +87,7 @@ public class BuyPanel : BasePanel
                     {
                         txtCantBuy.text = "金币不足!";
                         txtCantBuy.gameObject.SetActive(true);
-                        Invoke(nameof(HideTips), 1f);
+                        Invoke(nameof(HideTips), 0.5f);
                     }
                 }
                     break;

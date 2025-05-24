@@ -57,15 +57,15 @@ public class SelectPieceState : BaseState
     /// <returns></returns>
     private T_Role SelectPieceByGold(int targetGold)
     {
-        // 检查 AI 金币是否小于等于 0
-        if (GameDataMgr.Instance.AICoin <= 0)
+        // 检查 AI 金币是否小于等于 10
+        if (GameDataMgr.Instance.AICoin < 10)
         {
-            Debug.LogWarning("AI 金币不足，无法选择棋子");
+            //Debug.LogWarning("AI 金币不足，无法选择棋子");
             return null; // 返回空值
         }
 
         // 根据金币选择最接近的职业
-        // 这里假设有一个棋子列表 pieces
+        
         T_Role role = null;
         int minDifference = int.MaxValue;
 

@@ -34,10 +34,7 @@ public class MeleePlaceState : BaseState
         stateMachine.ChangeState(E_AI_State.EndTurn);
     }
 
-    /// <summary>
-    ///  寻找玩家棋子包围点落子
-    /// </summary>
-    /// <returns></returns>
+    
     /// <summary>
     /// 寻找玩家棋子包围点落子
     /// </summary>
@@ -127,7 +124,7 @@ public class MeleePlaceState : BaseState
             //将棋子添加至容器中，便于管理
             GameObjectMgr.Instance.AIChess.Add(aiPiece);
             GameObjectMgr.Instance.allChessList.Add(aiPiece);
-
+            
         });
 
         GameDataMgr.Instance.AICoin -= GameObjectMgr.Instance.AIRoleInfo.f_exp;

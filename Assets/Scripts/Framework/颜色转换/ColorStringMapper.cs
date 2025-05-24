@@ -12,7 +12,7 @@ public class ColorStringMapper
         {"yellow", Color.yellow},
         {"black", Color.black},
         {"white", Color.white},
-        // 可以根据需要添加更多颜色映射
+        
     };
 
     /// <summary>

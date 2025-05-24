@@ -17,6 +17,8 @@ public class GamePanel : BasePanel
 
     private Text txtTime;
 
+    public Text txtTip;
+
     private Image imgEnemyMobility;
     private Image imgPlayerMobility;
 
@@ -47,8 +49,13 @@ public class GamePanel : BasePanel
 
     public override void ShowMe()
     {
-        //ChangeType(E_RoleType.CloseCombat);
+        ChangeType(E_RoleType.CloseCombat);
         togCloseCombat.isOn = true;
+
+        if (SceneManager.GetActiveScene().buildIndex == 3)
+            btnAdvertise.gameObject.SetActive(false);
+        else
+            btnAdvertise.gameObject.SetActive(true);
     }
 
     protected override void Awake()
@@ -63,6 +70,7 @@ public class GamePanel : BasePanel
         txtEnemyMobilityNum= GetControl<Text>("txtEnemyMobilityNum");
         txtPlayerMobilityNum = GetControl<Text>("txtPlayerMobilityNum");
         txtTime = GetControl<Text>("txtTime");
+        //txtTip.gameObject.SetActive(false);
 
         imgEnemyMobility = GetControl<Image>("imgEnemyMobility");
         imgPlayerMobility = GetControl<Image>("imgPlayerMobility");
@@ -75,8 +83,8 @@ public class GamePanel : BasePanel
         togWizard = GetControl<Toggle>("togWizard");
 
         btnAdvertise = GetControl<Button>("btnAdvertise");
-        if(SceneManager.GetActiveScene().buildIndex==3)
-            btnAdvertise.gameObject.SetActive(false);
+
+        
     }
 
     private void Start()
@@ -97,7 +105,11 @@ public class GamePanel : BasePanel
         {
             case "btnRetreat":
                 //记录金币，返回开始场景
+                if(SceneManager.GetActiveScene().buildIndex == 1)
+                    PCAI.Instance.gameObject.SetActive(false);
+
                 GameObjectMgr.Instance.playerRoleInfo = null;
+                GameObjectMgr.Instance.AIRoleInfo = null;
                 GameLevelMgr.Instance.SetCheckFalse();
                 GameObjectMgr.Instance.ClearPiece();
                 MusicMgr.Instance.ClearSound();
@@ -112,7 +124,8 @@ public class GamePanel : BasePanel
                     UIMgr.Instance.ShowPanel<BeginPanel>(E_UILayer.Bottom, (panel) =>
                     {
                         panel.ChangeCoinNum(GameDataMgr.Instance.playCoin);
-                    });                    
+                    });
+                    GameObjectMgr.Instance.ClearPiece();
                 });
                 break;
             case "btnSetting":
@@ -124,6 +137,10 @@ public class GamePanel : BasePanel
                 MusicMgr.Instance.PlaySound("按钮点击");
                 //播放广告
                 AdvertisementMgr.Instance.ShowAdv();
+                //if (GameObjectMgr.Instance.AIChess.Count < 81)
+                //    ChessBoard.chessBoard.RandomPlaceTopPiece();
+                //else
+                //    ChessBoard.chessBoard.DeleteTenAIPiece();
                 break;
         }
     }
@@ -266,5 +283,15 @@ public class GamePanel : BasePanel
         imgPlayerMobility.rectTransform.sizeDelta = new Vector2(playerInitSize.x*mobility / 5 , playerInitSize.y);
     }
 
-    
+    public void ChangeTip(string name)
+    {
+        txtTip.gameObject.SetActive(true);
+        txtTip.text = name + "已降临";
+        Invoke(nameof(HideTip), 1f);
+    }
+
+    private void HideTip()
+    {
+        txtTip.gameObject.SetActive(false);
+    }
 }

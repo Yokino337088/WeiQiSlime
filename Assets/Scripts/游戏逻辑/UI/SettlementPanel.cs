@@ -31,6 +31,7 @@ public class SettlementPanel : BasePanel
             case "btnSure":
                 //记录金币，返回开始场景
                 GameObjectMgr.Instance.playerRoleInfo = null;
+                GameObjectMgr.Instance.AIRoleInfo = null;
                 GameLevelMgr.Instance.SetCheckFalse();
                 GameObjectMgr.Instance.ClearPiece();
                 MusicMgr.Instance.ClearSound();
@@ -53,6 +54,7 @@ public class SettlementPanel : BasePanel
                     UIMgr.Instance.HidePanel<PvpPanel>();
                 }
                 UIMgr.Instance.HidePanel<SettlementPanel>();
+                UIMgr.Instance.HidePanel<ReLifePanel>();
                 
                 SceneMgr.Instance.LoadSceneAsyn("开始场景", () =>
                 {
