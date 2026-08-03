@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 757859137
+CRC: 1189504972
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 896b0124cd111cc0390f7dabfa8aba5c
+    Hash: 512ad16f6581f6373d95dbda80836c0c
   TypeTreeHash:
     serializedVersion: 2
     Hash: 2456480987b78bb507c91733de619293
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 896b0124cd111cc0390f7dabfa8aba5c
+    Hash: 512ad16f6581f6373d95dbda80836c0c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -86,6 +86,7 @@ Assets:
 - "Assets/Editor/ArtRes/playerpiece/\u7267\u5E081.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u6C34\u6CD5\u5E082.prefab"
 - "Assets/Resources/playerpiece/\u706B\u6CD5\u5E083.prefab"
+- "Assets/Editor/ArtRes/playerpiece/\u8004\u800B.prefab"
 - "Assets/Resources/playerpiece/\u76FE\u62181.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u91CD\u5F292.prefab"
 - "Assets/Editor/ArtRes/playerpiece/\u523A\u5BA22.prefab"

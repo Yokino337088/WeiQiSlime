@@ -66,6 +66,8 @@ public class GameObjectMgr : SingletonAutoMono<GameObjectMgr>
     /// </summary>
     public List<T_Role> topRoleList = new List<T_Role>();
 
+    public T_Role maoDie;
+
     /// <summary>
     /// 将所有的角色信息加载进列表
     /// </summary>
@@ -75,7 +77,10 @@ public class GameObjectMgr : SingletonAutoMono<GameObjectMgr>
 
         foreach (var key in roleContainer.Keys)
         {
-            AllRoleList.Add(roleContainer[key]);
+            if (roleContainer[key].f_profession != 10)
+                AllRoleList.Add(roleContainer[key]);
+            else
+                maoDie = roleContainer[key];
         }
 
         foreach (var role in AllRoleList)

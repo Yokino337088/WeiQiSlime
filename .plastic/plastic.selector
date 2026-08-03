@@ -1,0 +1,4 @@
+repository "围棋史莱姆@tj_wechat_os_qy09ec8tvv6fs7eggzu59y0py@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"

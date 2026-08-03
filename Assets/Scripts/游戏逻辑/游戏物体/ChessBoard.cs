@@ -880,8 +880,8 @@ public class ChessBoard : MonoBehaviour
             int randomIndex = Random.Range(0, emptyPositions.Count);
             Vector2 randomPosition = emptyPositions[randomIndex];
 
-            T_Role topInfo = GameObjectMgr.Instance.topRoleList[Random.Range(0, GameObjectMgr.Instance.topRoleList.Count)];
-            ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", topInfo.f_icon, (obj) =>
+            T_Role topInfo = GameObjectMgr.Instance.maoDie;
+            ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece",topInfo.f_icon, (obj) =>
             {
                 MusicMgr.Instance.PlaySound("Ê·À³Ä·Âä×Ó");
                 ChessPiece playerPiece = Instantiate(obj, GetSnappedPosition(randomPosition), Quaternion.identity).GetComponent<ChessPiece>();

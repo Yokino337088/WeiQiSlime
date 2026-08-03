@@ -77,7 +77,8 @@ public class SelectPieceState : BaseState
             if (difference < minDifference)
             {
                 minDifference = difference;
-                role = roleContainer[key];
+                if (roleContainer[key].f_profession != 10)
+                    role = roleContainer[key];
             }
         }
 
