@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>围棋史莱姆 · 性能分析报告（冒险关卡21 · 满盘压力）</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2933; --sub:#5b6b7c;
+    --line:#e3e8ef; --good:#16a34a; --warn:#d97706; --bad:#dc2626; --accent:#2563eb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:32px 20px;background:var(--bg);color:var(--ink);
+       font:15px/1.7 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 6px}
+  h2{font-size:19px;margin:34px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:22px 0 8px}
+  .meta{color:var(--sub);font-size:13px;margin-bottom:22px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0;
+        box-shadow:0 1px 2px rgba(16,24,40,.04)}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:#f8fafc;color:var(--sub);font-weight:600;white-space:nowrap}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .kpi .v{font-size:23px;font-weight:700;line-height:1.25}
+  .kpi .l{color:var(--sub);font-size:12.5px;margin-top:2px}
+  .flag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:600}
+  .f-good{background:#e7f7ed;color:var(--good)}
+  .f-warn{background:#fdf3e3;color:var(--warn)}
+  .f-bad{background:#fdeaea;color:var(--bad)}
+  ul{margin:8px 0 8px 20px;padding:0}
+  li{margin:5px 0}
+  .note{color:var(--sub);font-size:13px}
+  .shot{width:100%;border:1px solid var(--line);border-radius:8px;display:block}
+  .legend{font-size:13px;color:var(--sub);margin-top:6px}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:middle;margin-right:4px}
+  footer{color:var(--sub);font-size:12.5px;margin-top:30px;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>围棋史莱姆 · 性能分析报告</h1>
+  <div class="meta">
+    场景：<code>Assets/Scenes/游戏场景.unity</code> ｜ 关卡：冒险关卡 21（用户指定） ｜ 场上棋子：<b>60 / 81</b>（接近满盘）<br>
+    采集时间：2026-10-11 17:40–17:45 ｜ 采集方式：MCP for Unity（HTTP 桥接）自动采样，共 5 组帧时间 + 3 组 Profiler 计数器
+  </div>
+
+  <h2>一、结论摘要</h2>
+  <div class="grid">
+    <div class="kpi"><div class="v" style="color:var(--good)">4.2–4.8 ms</div><div class="l">主线程每帧耗时（16.7ms 预算的 ~28%）</div></div>
+    <div class="kpi"><div class="v" style="color:var(--good)">13–14 ms</div><div class="l">帧间隔（≈70 FPS，无 vSync 上限）</div></div>
+    <div class="kpi"><div class="v">42 / 18</div><div class="l">DrawCall / SetPass（60 棋子 + 全套 UI）</div></div>
+    <div class="kpi"><div class="v" style="color:var(--warn)">12–31 KB</div><div class="l">每帧 GC 分配（200–460 次/帧）</div></div>
+  </div>
+  <div class="card">
+    <p style="margin-top:0">
+      <span class="flag f-good">通过</span>
+      在接近满盘（60/81 棋子）的战斗压力下，游戏稳定跑在帧率上限，主线程仅用掉约四分之一预算，
+      渲染线程 ~3ms、GPU 1–2ms。<b>先前"棋子一多就掉帧"的问题没有复现</b>。
+    </p>
+    <p style="margin-bottom:0">
+      <span class="flag f-warn">注意</span>
+      编辑器<b>失焦时游戏会被节流</b>（帧间隔飙到 ~100ms，但主线程只有 6.5ms）——
+      这是 PlayerSettings 里 <code>runInBackground: 0</code> 导致的编辑器行为，不是游戏性能问题；
+      测性能时必须让 Unity 窗口保持前台（或勾选 Run In Background），否则数据完全不可用。
+    </p>
+  </div>
+
+  <h2>二、运行环境</h2>
+  <div class="card">
+    <table>
+      <tr><th>项目</th><th>值</th></tr>
+      <tr><td>Unity</td><td>2022.3.15f1c1（WindowsEditor / DX11）</td></tr>
+      <tr><td>CPU</td><td>12th Gen Intel Core i7-12700H（14 核 / 20 线程）</td></tr>
+      <tr><td>GPU</td><td>Intel Iris Xe Graphics（核显）</td></tr>
+      <tr><td>内存</td><td>15.7 GB（Unity 进程工作集 2.85 GB）</td></tr>
+      <tr><td>屏幕</td><td>1493 × 933（编辑器含 Game 视图 + Scene 视图 + Profiler 窗口）</td></tr>
+      <tr><td>测试对象</td><td>全部关卡解锁 + 全部 65 个棋子解锁 + 一亿金币（调试菜单写入）</td></tr>
+    </table>
+    <p class="note" style="margin-bottom:0">
+      编辑器内的测量<b>包含编辑器自身开销</b>（Scene 视图渲染 ≈2.9ms、Profiler 窗口 ≈1ms、编辑器 UI），真机数据通常会更好。
+    </p>
+  </div>
+
+  <h2>三、采样方法</h2>
+  <div class="card">
+    <ul>
+      <li><b>帧时间</b>：<code>FrameTimingManager</code>（MCP <code>manage_profiler · get_frame_timing</code>），每 25–30 秒采样一次，共 5 组。</li>
+      <li><b>渲染/内存计数器</b>：Unity Profiler 计数器（<code>get_counters</code>，Render / Memory 组），共 3 组。</li>
+      <li><b>场上棋子数</b>：<code>find_gameobjects(by_component=ChessPiece)</code>，全程 60 个（未增长：AI 侧已停止落子、玩家侧无人操作）。</li>
+      <li><b>截图</b>：ScreenCapture 抓取 Game 视图 → <code>battle_screenshot.png</code>（见附录）。</li>
+      <li>战斗本身由游戏 AI 自动推进，未做人工干预。</li>
+    </ul>
+  </div>
+
+  <h2>四、帧时间时间线</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>时刻(约)</th><th>编辑器状态</th>
+          <th class="num">帧间隔</th><th class="num">主线程</th><th class="num">渲染线程</th><th class="num">GPU</th><th class="num">棋子数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>17:40:2x</td><td>失焦（低负载/挂起期间）</td><td class="num">12.13</td><td class="num">3.99</td><td class="num">3.60</td><td class="num">0.75</td><td class="num">60</td></tr>
+        <tr><td>2</td><td>17:41:04</td><td>失焦（被节流）</td><td class="num" style="color:var(--warn)">100.73</td><td class="num">6.48</td><td class="num">5.96</td><td class="num">0.69</td><td class="num">60</td></tr>
+        <tr><td>3</td><td>17:42:27</td><td>刚切回前台（过渡帧）</td><td class="num" style="color:var(--warn)">99.04</td><td class="num" style="color:var(--warn)">21.04</td><td class="num">2.14</td><td class="num">1.10</td><td class="num">60</td></tr>
+        <tr><td>4</td><td>17:43:41</td><td>前台稳定运行</td><td class="num" style="color:var(--good)">14.03</td><td class="num" style="color:var(--good)">4.38</td><td class="num">3.51</td><td class="num">1.09</td><td class="num">60</td></tr>
+        <tr><td>5</td><td>17:44:5x</td><td>前台稳定运行</td><td class="num" style="color:var(--good)">13.02</td><td class="num" style="color:var(--good)">4.78</td><td class="num">3.23</td><td class="num">1.96</td><td class="num">60</td></tr>
+      </tbody>
+    </table>
+    <div class="legend"><span class="sw" style="background:#2563eb"></span>帧间隔 <span class="sw" style="background:#16a34a;margin-left:12px"></span>主线程</div>
+    <svg viewBox="0 0 720 240" width="100%" height="240" role="img" aria-label="帧时间对比图">
+      <line x1="60" y1="200" x2="700" y2="200" stroke="#cbd5e1"/>
+      <line x1="60" y1="150" x2="700" y2="150" stroke="#eef2f7"/>
+      <line x1="60" y1="100" x2="700" y2="100" stroke="#eef2f7"/>
+      <line x1="60" y1="50"  x2="700" y2="50"  stroke="#eef2f7"/>
+      <text x="52" y="204" font-size="11" fill="#5b6b7c" text-anchor="end">0</text>
+      <text x="52" y="154" font-size="11" fill="#5b6b7c" text-anchor="end">35</text>
+      <text x="52" y="104" font-size="11" fill="#5b6b7c" text-anchor="end">70</text>
+      <text x="52" y="54"  font-size="11" fill="#5b6b7c" text-anchor="end">105</text>
+      <text x="16" y="130" font-size="11" fill="#5b6b7c" transform="rotate(-90 16 130)" text-anchor="middle">毫秒</text>
+      <!-- 帧间隔（上限 105ms 映射到 150px 高度） -->
+      <rect x="100" y="183" width="44" height="17"  fill="#2563eb" opacity=".85"/>
+      <rect x="220" y="56"  width="44" height="144" fill="#2563eb" opacity=".85"/>
+      <rect x="340" y="59"  width="44" height="141" fill="#2563eb" opacity=".85"/>
+      <rect x="460" y="180" width="44" height="20"  fill="#2563eb" opacity=".85"/>
+      <rect x="580" y="181" width="44" height="19"  fill="#2563eb" opacity=".85"/>
+      <!-- 主线程（上限 105ms 同一标尺） -->
+      <rect x="146" y="194" width="24" height="6"   fill="#16a34a"/>
+      <rect x="266" y="191" width="24" height="9"   fill="#16a34a"/>
+      <rect x="386" y="170" width="24" height="30"  fill="#16a34a"/>
+      <rect x="506" y="194" width="24" height="6"   fill="#16a34a"/>
+      <rect x="626" y="193" width="24" height="7"   fill="#16a34a"/>
+      <text x="122" y="222" font-size="12" fill="#5b6b7c" text-anchor="middle">#1 失焦</text>
+      <text x="242" y="222" font-size="12" fill="#5b6b7c" text-anchor="middle">#2 失焦</text>
+      <text x="362" y="222" font-size="12" fill="#5b6b7c" text-anchor="middle">#3 过渡</text>
+      <text x="482" y="222" font-size="12" fill="#5b6b7c" text-anchor="middle">#4 稳定</text>
+      <text x="602" y="222" font-size="12" fill="#5b6b7c" text-anchor="middle">#5 稳定</text>
+    </svg>
+  </div>
+
+  <h2>五、稳定态指标（前台运行 · 60 棋子）</h2>
+  <div class="card">
+    <h3>CPU / GPU</h3>
+    <table>
+      <thead><tr><th>指标</th><th class="num">值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>主线程帧耗时</td><td class="num">4.15 ms</td><td>游戏逻辑 + 逻辑侧提交（16.7ms 预算的 25%）</td></tr>
+        <tr><td>渲染线程帧耗时</td><td class="num">2.85 ms</td><td>渲染命令处理</td></tr>
+        <tr><td>GPU 帧耗时</td><td class="num">1.10 ms</td><td>2D 精灵 + 图集合批后的实际 GPU 成本</td></tr>
+        <tr><td>CPU 总帧耗时</td><td class="num">11.19 ms</td><td>含等待/同步；对应帧率 ≥60</td></tr>
+      </tbody>
+    </table>
+
+    <h3>渲染</h3>
+    <table>
+      <thead><tr><th>指标</th><th class="num">值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>DrawCall</td><td class="num">42</td><td>60 个棋子（含底座/血条/被围标识子物体）+ UI 全算在内</td></tr>
+        <tr><td>SetPass</td><td class="num">18</td><td>合批效果良好</td></tr>
+        <tr><td>三角面 / 顶点</td><td class="num">4358 / 11162</td><td>2D 精灵量级，可忽略</td></tr>
+        <tr><td>动态合批 DrawCall</td><td class="num">180</td><td>SpriteRenderer 走动态合批</td></tr>
+        <tr><td>使用纹理</td><td class="num">21 张 / 13.25 MB</td><td>棋子立绘已合图集，贴图切换少</td></tr>
+      </tbody>
+    </table>
+
+    <h3>内存 / GC</h3>
+    <table>
+      <thead><tr><th>指标</th><th class="num">值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>每帧 GC 分配</td><td class="num" style="color:var(--warn)">11.9 – 30.6 KB</td><td>214–458 次分配/帧 → 会周期性触发 GC</td></tr>
+        <tr><td>GC 分配自身耗时</td><td class="num">0.036 ms</td><td><code>GC.Alloc</code> 计数器：不构成卡顿</td></tr>
+        <tr><td>托管堆已用</td><td class="num">808 MB</td><td>编辑器数值（含编辑器自身）</td></tr>
+        <tr><td>纹理内存</td><td class="num">327 MB</td><td>编辑器数值（含编辑器内置资源）</td></tr>
+        <tr><td>2D 物理内存</td><td class="num">304 KB</td><td>几乎为零：命中/点选未走重物理</td></tr>
+        <tr><td>音频内存</td><td class="num">55 MB</td><td>背景音乐 + 音效池</td></tr>
+        <tr><td>场景 GameObject 数</td><td class="num">1154</td><td>含 UI、特效、子弹池</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>六、关键发现</h2>
+  <div class="card">
+    <ol>
+      <li>
+        <b>满盘压力下帧率有余量。</b>60 个棋子（9×9 棋盘）时主线程 4.2–4.8ms，
+        远低于 16.7ms 预算；<code>SpriteRenderer.PrepareNode</code> 仅 0.46ms，
+        说明棋子渲染与逻辑都不再随数量线性恶化。
+      </li>
+      <li>
+        <b>编辑器失焦会节流（重要干扰项）。</b><code>runInBackground: 0</code> 时编辑器失焦 → 帧间隔 100ms、
+        但主线程只有 6.5ms，说明是"没在跑"而不是"跑不动"。后续所有性能对比都必须在 Unity 前台的条件下做，
+        或先把 Run In Background 勾上。
+      </li>
+      <li>
+        <b>UI（UGUI Canvas）是渲染侧最大单项。</b>采样瞬间 <code>Canvas.Sort</code> 1.89ms、
+        <code>Canvas.GeometryJob</code> 1.42ms、<code>Canvas.PrepareBatches</code> 0.60ms，
+        而 <code>UIR.DrawChain</code> 出现 18.68ms 的采样值（可能含多帧累计，仅供参考）。
+        UI 的合批/重建成本已经高于棋子本身。
+      </li>
+      <li>
+        <b>每帧仍有 12–31KB 托管分配。</b>会产生周期性 GC（尖峰而非均值问题）。
+        旧的"每棋子协程 + 每帧 new List"已消失（协程计数器 <code>CoroutinesDelayedCalls</code> 读数 0），
+        剩余分配源需要开 Allocation Callstacks 定位。
+      </li>
+      <li>
+        <b>战斗在采样期间处于静止。</b>棋子数 60 恒定、AI 未继续落子，因此拿到的是"高负载静态盘面"，
+        而不是"持续落子 + 攻击特效齐发"的峰值场景；峰值需要用脚本压测或人工连续落子来补测。
+      </li>
+    </ol>
+  </div>
+
+  <h2>七、优化建议（按收益排序）</h2>
+  <div class="card">
+    <ol>
+      <li><b>拆 Canvas：</b>把每帧变化的元素（金币/行动力/血条/倒计时）从主 Canvas 拆到独立 Canvas，减少整块 Canvas 的重建与排序；静态 UI 保持同图集同材质。</li>
+      <li><b>消 GC 分配：</b>用 Profiler 的 Allocation Callstacks（<code>profiler_start(enable_callstacks=true)</code>）抓一次落子/攻击过程的分配栈，优先清掉每帧都发生的分配（字符串拼接、装箱、闭包、LINQ）。</li>
+      <li><b>补峰值压测：</b>满盘 + 连续落子 + 多枚子弹同时命中时再采一轮（可用调试菜单加"批量落子"键实现），确认峰值下主线程仍 &lt;8ms。</li>
+      <li><b>真机复测：</b>Android 上关闭 <code>ABResMgr.isDebug</code> 走 AB 流程，重点看加载期卡顿与图集显存（2048×2048）表现；编辑器数据不能代表手机。</li>
+      <li><b>可选：</b>被围标识（<code>围_0001</code>）目前只有被围的棋子才推进帧动画，已是最优；若要进一步省，可把它的帧率降到 10fps。</li>
+    </ol>
+  </div>
+
+  <h2>八、附录</h2>
+  <div class="card">
+    <h3>战场截图（Game 视图，ScreenCapture）</h3>
+    <img class="shot" src="battle_screenshot.png" alt="战场截图">
+    <p class="note">截图为采样结束时（约 17:43:50）的 Game 视图，包含 60 个棋子与 UI。</p>
+
+    <h3>原始计数器（稳定态，节选）</h3>
+    <table>
+      <thead><tr><th>计数器</th><th class="num">原始值</th><th class="num">换算</th></tr></thead>
+      <tbody>
+        <tr><td>CPU Main Thread Frame Time</td><td class="num">4,145,800 ns</td><td class="num">4.15 ms</td></tr>
+        <tr><td>CPU Render Thread Frame Time</td><td class="num">2,853,100 ns</td><td class="num">2.85 ms</td></tr>
+        <tr><td>GPU Frame Time</td><td class="num">1,100,677 ns</td><td class="num">1.10 ms</td></tr>
+        <tr><td>CPU Total Frame Time</td><td class="num">11,185,500 ns</td><td class="num">11.19 ms</td></tr>
+        <tr><td>Batches / Draw Calls / SetPass</td><td class="num">42 / 42 / 18</td><td class="num">—</td></tr>
+        <tr><td>Triangles / Vertices</td><td class="num">4358 / 11162</td><td class="num">—</td></tr>
+        <tr><td>GC Allocated In Frame</td><td class="num">30,648 B</td><td class="num">30.6 KB</td></tr>
+        <tr><td>GC Allocation In Frame Count</td><td class="num">458</td><td class="num">次/帧</td></tr>
+        <tr><td>Canvas.Sort</td><td class="num">1,888,500 ns</td><td class="num">1.89 ms</td></tr>
+        <tr><td>Canvas.GeometryJob</td><td class="num">1,417,700 ns</td><td class="num">1.42 ms</td></tr>
+        <tr><td>Canvas.PrepareBatches</td><td class="num">596,200 ns</td><td class="num">0.60 ms</td></tr>
+        <tr><td>SpriteRenderer.PrepareNode</td><td class="num">457,700 ns</td><td class="num">0.46 ms</td></tr>
+        <tr><td>Camera.Render</td><td class="num">2,636,800 ns</td><td class="num">2.64 ms</td></tr>
+        <tr><td>SceneCamera.Render（编辑器开销）</td><td class="num">2,890,400 ns</td><td class="num">2.89 ms</td></tr>
+      </tbody>
+    </table>
+
+    <h3>控制台</h3>
+    <p class="note" style="margin-bottom:0">
+      采样期间无游戏运行期报错。仅有一条与运行无关的历史问题：<code>Google.IOSResolver.dll will not be loaded</code>（ExternalDependencyManager），
+      以及首次运行 <code>achieveList.tang</code> 不存在的一次性提示。
+    </p>
+  </div>
+
+  <footer>
+    由 CodeBuddy 通过 MCP for Unity 自动采集与生成 ｜ 采集脚本：<code>manage_profiler(get_frame_timing / get_counters)</code> +
+    <code>find_gameobjects</code> + <code>manage_camera(screenshot)</code> ｜ 报告文件：<code>Assets/性能分析报告/性能分析报告.html</code>
+  </footer>
+</div>
+</body>
+</html>

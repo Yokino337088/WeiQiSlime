@@ -17,24 +17,19 @@ public class ChessBoard : MonoBehaviour
 
     public ChessPiece selectedPiece; // 当前选中的棋子
 
-    public List<Vector2> validMovePositions = new List<Vector2>(); // 可移动的空位置
-
     public GameObject point;
     public static ChessBoard chessBoard;
-    //用于储存可视化移动点的列表
-    private List<GameObject> pointObjects = new List<GameObject>();
-
-    private List<GameObject> atkPoints = new List<GameObject>();
 
     List<T_Role> nowLevelRole = new List<T_Role>();
 
-    private Coroutine checkPieceIsOverlap;
-
-    private float proximityThreshold = 0.15f;
+    private Camera mainCamera;   // 缓存主相机，避免每次点击都做 Camera.main 查找
 
     private void Awake()
     {
         chessBoard = this;
+
+        // 棋盘是子系统的数据源：绑定后由 ChessPieceMgr 统一维护网格索引与帧更新
+        ChessPieceMgr.Instance.BindBoard(this);
 
         if (GameLevelMgr.Instance.nowLevelInfo != null)
         {
@@ -53,13 +48,6 @@ public class ChessBoard : MonoBehaviour
     private void Start()
     {
         InputMgr.Instance.StartOrCloseInputMgr(true);
-
-        //checkPieceIsOverlap = StartCoroutine(CheckProximity());
-    }
-
-    private void Update()
-    {
-        CheckProximity();
     }
 
     private void OnEnable()
@@ -75,8 +63,6 @@ public class ChessBoard : MonoBehaviour
         {
             InputMgr.Instance.OnScreenTapped -= OnScreenTapped;
         }
-
-        //StopCoroutine(CheckProximity());
     }
 
     /// <summary>
@@ -84,27 +70,22 @@ public class ChessBoard : MonoBehaviour
     /// </summary>
     private void OnScreenTapped(Vector2 screenPosition)
     {
-        //Debug.Log("屏幕点击位置: " + screenPosition);
+        if (mainCamera == null) mainCamera = Camera.main;
+
         // 得到点击屏幕的世界坐标
-        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(screenPosition);
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(screenPosition);
         // 2D游戏要确保z坐标等于0
         worldPosition.z = 0;
-        //Debug.Log("世界坐标: " + worldPosition);
 
-        RaycastHit2D hit = Physics2D.Raycast(worldPosition, Vector2.zero);
-        if (hit.collider != null)
+        // 直接用棋盘网格索引取该格子上的棋子（O(1)），不再走物理射线检测：
+        // 省掉每次点击的物理查询，也不用担心物理状态不同步导致点不中棋子
+        ChessPiece piece = ChessPieceMgr.Instance.GetPiece(worldPosition);
+        if (piece != null)
         {
-            //Debug.Log("点击对象: " + hit.collider.name);
-            ChessPiece piece = hit.collider.GetComponent<ChessPiece>();
-            if (piece != null)
-            {
-                //Debug.Log("点击棋子: " + piece.name);
-                HandlePieceClick(piece);
-            }
+            HandlePieceClick(piece);
         }
-        else //必须要检测点击的坐标是否处于棋盘内
+        else //点的是空格子，走落子/移动逻辑
         {
-            //Debug.Log("点击棋盘");
             HandleBoardClick(worldPosition);
         }
     }
@@ -164,41 +145,30 @@ public class ChessBoard : MonoBehaviour
             //如果玩家在UI面板选中了棋子的类型
             if (GameObjectMgr.Instance.playerRoleInfo != null && GameDataMgr.Instance.playerMobility > 0 && IsPositionValid(worldPosition) && GameDataMgr.Instance.playCoin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0 && GetPiece(worldPosition) == null && GameObjectMgr.Instance.isClickPiece == false && selectedPiece == null)
             {
-                ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
+                MusicMgr.Instance.PlaySound("史莱姆落子");
+                //共用一个棋子预制体，生成时按角色动态装配图片与动画
+                ChessPiece playerPiece = ChessPieceMgr.Instance.SpawnPiece(
+                    GetSnappedPosition(worldPosition),
+                    GameObjectMgr.Instance.playerRoleInfo,
+                    ChessPiece.PieceFaction.Player);
+
+                GameDataMgr.Instance.playerMobility--;
+                if (GameDataMgr.Instance.playerMobility < 0)
+                    GameDataMgr.Instance.playerMobility = 0;
+                //更新UI
+                UIMgr.Instance.GetPanel<GamePanel>(panel =>
                 {
-                    MusicMgr.Instance.PlaySound("史莱姆落子");
-                    ChessPiece playerPiece = Instantiate(obj, GetSnappedPosition(worldPosition), Quaternion.identity).GetComponent<ChessPiece>();
+                    panel.ChangePlayerMobility(GameDataMgr.Instance.playerMobility);
+                });
 
-                    //设置棋子的阵营
-                    playerPiece.color = ChessPiece.PieceFaction.Player;
-                    //初始化棋子的数值
-                    playerPiece.SetData(GameObjectMgr.Instance.playerRoleInfo);
-                    playerPiece.needCheckSurrounding = true;
-                    //GameObjectMgr.Instance.isPlayerSelect = false;
-                    //print(playerPiece.roleProperty.f_name);
-                    //将棋子添加至容器中，便于管理
-                    GameObjectMgr.Instance.playerChess.Add(playerPiece);
-                    GameObjectMgr.Instance.allChessList.Add(playerPiece);
-
-                    GameDataMgr.Instance.playerMobility--;
-                    if (GameDataMgr.Instance.playerMobility < 0)
-                        GameDataMgr.Instance.playerMobility = 0;
-                    //更新UI
-                    UIMgr.Instance.GetPanel<GamePanel>(panel =>
-                    {
-                        panel.ChangePlayerMobility(GameDataMgr.Instance.playerMobility);
-                    });
-
-                    //扣除玩家金币
-                    GameDataMgr.Instance.playCoin -= playerPiece.roleProperty.f_exp;
-                    //记录玩家的消耗
-                    GameDataMgr.Instance.playerSpend += playerPiece.roleProperty.f_exp;
-                    //更新UI
-                    UIMgr.Instance.GetPanel<GamePanel>(panel =>
-                    {
-                        panel.ChangePlayerCoin(GameDataMgr.Instance.playCoin);
-                    });
-
+                //扣除玩家金币
+                GameDataMgr.Instance.playCoin -= playerPiece.roleProperty.f_exp;
+                //记录玩家的消耗
+                GameDataMgr.Instance.playerSpend += playerPiece.roleProperty.f_exp;
+                //更新UI
+                UIMgr.Instance.GetPanel<GamePanel>(panel =>
+                {
+                    panel.ChangePlayerCoin(GameDataMgr.Instance.playCoin);
                 });
 
             }
@@ -247,54 +217,40 @@ public class ChessBoard : MonoBehaviour
                 //如果是玩家1的回合
                 if (GameDataMgr.Instance.PlayerRound == 1 && GameDataMgr.Instance.player1Coin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0)
                 {
-                    ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
+                    MusicMgr.Instance.PlaySound("史莱姆落子");
+                    //共用一个棋子预制体，生成时按角色动态装配图片与动画
+                    ChessPiece player1Piece = ChessPieceMgr.Instance.SpawnPiece(
+                        GetSnappedPosition(worldPosition),
+                        GameObjectMgr.Instance.playerRoleInfo,
+                        ChessPiece.PieceFaction.Player1);
+
+                    //扣除金币，更新UI
+                    GameDataMgr.Instance.player1Coin -= player1Piece.roleProperty.f_exp;
+                    UIMgr.Instance.GetPanel<PvpPanel>(panel =>
                     {
-                        MusicMgr.Instance.PlaySound("史莱姆落子");
-                        ChessPiece playerPiece = Instantiate(obj, GetSnappedPosition(worldPosition), Quaternion.identity).GetComponent<ChessPiece>();
-                        //设置棋子的阵营
-                        playerPiece.color = ChessPiece.PieceFaction.Player1;
-                        //初始化棋子的数值
-                        playerPiece.SetData(GameObjectMgr.Instance.playerRoleInfo);
-                        playerPiece.needCheckSurrounding = true;
-                        //将棋子添加至容器中，便于管理
-                        GameObjectMgr.Instance.player1List.Add(playerPiece);
-                        GameObjectMgr.Instance.allChessList.Add(playerPiece);
-
-                        //扣除金币，更新UI
-                        GameDataMgr.Instance.player1Coin -= playerPiece.roleProperty.f_exp;
-                        UIMgr.Instance.GetPanel<PvpPanel>(panel =>
-                        {
-                            panel.ChangePlayer1Coin(GameDataMgr.Instance.player1Coin);
-                            panel.Player1EndOfDrop();
-                        });
-
+                        panel.ChangePlayer1Coin(GameDataMgr.Instance.player1Coin);
+                        panel.Player1EndOfDrop();
                     });
+
                     //EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
                 }
                 else if (GameDataMgr.Instance.PlayerRound == 2 && GameDataMgr.Instance.player2Coin - GameObjectMgr.Instance.playerRoleInfo.f_exp >= 0)//如果是玩家2的回合
                 {
-                    ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
+                    MusicMgr.Instance.PlaySound("史莱姆落子");
+                    //玩家2用敌人那套美术
+                    ChessPiece player2Piece = ChessPieceMgr.Instance.SpawnPiece(
+                        GetSnappedPosition(worldPosition),
+                        GameObjectMgr.Instance.playerRoleInfo,
+                        ChessPiece.PieceFaction.Player2);
+
+                    //扣除金币，更新UI
+                    GameDataMgr.Instance.player2Coin -= player2Piece.roleProperty.f_exp;
+                    UIMgr.Instance.GetPanel<PvpPanel>(panel =>
                     {
-                        MusicMgr.Instance.PlaySound("史莱姆落子");
-                        ChessPiece playerPiece = Instantiate(obj, GetSnappedPosition(worldPosition), Quaternion.identity).GetComponent<ChessPiece>();
-                        //设置棋子的阵营
-                        playerPiece.color = ChessPiece.PieceFaction.Player2;
-                        //初始化棋子的数值
-                        playerPiece.SetData(GameObjectMgr.Instance.playerRoleInfo);
-                        playerPiece.needCheckSurrounding = true;
-                        //将棋子添加至容器中，便于管理
-                        GameObjectMgr.Instance.player2List.Add(playerPiece);
-                        GameObjectMgr.Instance.allChessList.Add(playerPiece);
-
-                        //扣除金币，更新UI
-                        GameDataMgr.Instance.player2Coin -= playerPiece.roleProperty.f_exp;
-                        UIMgr.Instance.GetPanel<PvpPanel>(panel =>
-                        {
-                            panel.ChangePlayer2Coin(GameDataMgr.Instance.player2Coin);
-                            panel.Player2EndOfDrop();
-                        });
-
+                        panel.ChangePlayer2Coin(GameDataMgr.Instance.player2Coin);
+                        panel.Player2EndOfDrop();
                     });
+
                     // EventCenter.Instance.EventTrigger(E_EventType.E_IsSurrounded);
                 }
             }
@@ -366,292 +322,48 @@ public class ChessBoard : MonoBehaviour
     }
 
     /// <summary>
-    /// 计算棋子可移动的空位置
-    /// </summary>
-    private void CalculateValidMovePositions(ChessPiece piece)
-    {
-        validMovePositions.Clear();
-
-        Vector2 startPosition = (Vector2)piece.transform.position;
-        int moveRange = piece.roleProperty.f_move;
-
-        while (moveRange > 0)
-        {
-            // 检查上下左右四个方向
-            Vector2[] directions = new Vector2[]
-            {
-                    new Vector2(0, cellSize * moveRange),  // 上
-                    new Vector2(0, -cellSize * moveRange), // 下
-                    new Vector2(-cellSize * moveRange, 0), // 左
-                    new Vector2(cellSize * moveRange, 0)   // 右
-            };
-
-            foreach (Vector2 dir in directions)
-            {
-                Vector2 neighbor = startPosition + dir;
-                ChessPiece neighborPiece = GetPiece(neighbor);
-
-                if (IsPositionValid(neighbor))
-                {
-                    if (neighborPiece == null) // 空位
-                    {
-                        validMovePositions.Add(neighbor);
-                    }
-                }
-            }
-
-            moveRange--; // 每搜索一层，moveRange 减 1
-        }
-    }
-
-
-    /// <summary>
-    /// 显示可移动的空位置
-    /// </summary>
-    private void ShowValidMovePositions()
-    {
-        foreach (Vector2 position in validMovePositions)
-        {
-            Debug.Log($"可移动位置: {position}");
-            // 在这里可以添加可视化逻辑，例如显示高亮方块
-            GameObject obj = Instantiate(point, position, Quaternion.identity);
-            pointObjects.Add(obj);
-        }
-    }
-
-    /// <summary>
-    /// 清除可移动的空位置
+    /// 清除可移动点显示（兼容旧接口：清除当前选中棋子的提示点）
     /// </summary>
     public void ClearValidMovePositions()
     {
-        validMovePositions.Clear();
-        // 在这里可以清除可视化逻辑，例如隐藏高亮方块
-        foreach (GameObject obj in pointObjects)
-        {
-            Destroy(obj);
-        }
-        pointObjects.Clear();
+        if (selectedPiece != null) selectedPiece.ClearValidMovePositions();
     }
 
 
 
     /// <summary>
-    /// 安全版棋子检测方法（适配安卓平台）
+    /// 获取指定位置上的棋子（走棋盘网格索引，O(1)；安卓上物理检测不准，一直用的是坐标判断）
     /// </summary>
     public ChessPiece GetPiece(Vector2 position)
     {
-        //安卓平台上的物理检测有点问题，不能用
-        if (GameObjectMgr.Instance.allChessList == null)
-            return null;
-
-        //改用距离检测
-        foreach (var piece in GameObjectMgr.Instance.allChessList)
-        {
-            Vector2 piecePos = piece.transform.position;
-            float distanceSqr = (piecePos - position).sqrMagnitude;
-
-            if (distanceSqr <= 0.5f * 0.5f)
-                return piece;
-        }
-        return null;
+        return ChessPieceMgr.Instance.GetPiece(position);
     }
 
     /// <summary>
-    /// 获取重叠的棋子
+    /// 获取重叠的棋子（网格索引下同一格最多只有一个棋子）
     /// </summary>
     public List<ChessPiece> GetPiecesOverlap(Vector2 position)
     {
-        List<ChessPiece> resultPieces = new List<ChessPiece>();
+        List<ChessPiece> resultPieces = new List<ChessPiece>(2);
 
-        //安卓平台上的物理检测有点问题，不能用
-        if (GameObjectMgr.Instance.allChessList == null)
+        ChessPiece piece = ChessPieceMgr.Instance.GetPiece(position);
+        if (piece == null)
             return resultPieces;
 
-        //改用距离检测
-        foreach (var piece in GameObjectMgr.Instance.allChessList)
-        {
-            Vector2 piecePos = piece.transform.position;
-            float distanceSqr = (piecePos - position).sqrMagnitude;
+        Vector2 piecePos = piece.transform.position;
+        if ((piecePos - position).sqrMagnitude <= 0.25f * 0.25f)
+            resultPieces.Add(piece);
 
-            if (distanceSqr <= 0.25f * 0.25f)
-            {
-                resultPieces.Add(piece);
-                if (resultPieces.Count >= 2)
-                {
-                    return resultPieces;
-                }
-            }
-        }
         return resultPieces;
     }
 
     /// <summary>
-    /// 获取棋子的方法
-    /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
-    public ChessPiece GetPiece2(Vector2 position)
-    {
-        if (IsPositionValid(position))
-        {
-            // 确保物理状态同步
-            Physics2D.SyncTransforms();
-
-            // 获取棋子所在的层级
-            int layerMask = 1 << LayerMask.NameToLayer("ChessPiece");
-
-            // 使用 OverlapCircleAll 来检测圆形碰撞体，增大检测半径
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(position, 0.5f, layerMask);
-            foreach (Collider2D collider in colliders)
-            {
-                ChessPiece chess = collider.GetComponent<ChessPiece>();
-                if (chess != null)
-                {
-                    return chess;
-                }
-            }
-        }
-        return null;
-    }
-
-    /// <summary>
-    /// 获取与目标棋子相连的所有同色棋子
-    /// </summary>
-    private List<Vector2> GetConnectedGroup(Vector2 position, ChessPiece.PieceFaction color)
-    {
-        // 存储相连同色棋子位置的列表
-        List<Vector2> connectedGroup = new List<Vector2>();
-        // 存储已访问位置的哈希集
-        HashSet<Vector2> visited = new HashSet<Vector2>();
-        // 用于广度优先搜索的队列
-        Queue<Vector2> queue = new Queue<Vector2>();
-
-
-        if (GetPiece(position) != null && GetPiece(position).color == color)
-        {
-            // 将起始位置加入队列和已访问集合
-            queue.Enqueue(position);
-            visited.Add(position);
-        }
-
-        while (queue.Count > 0)
-        {
-            // 取出队列中的当前位置
-            Vector2 current = queue.Dequeue();
-            // 将当前位置加入相连同色棋子列表
-            connectedGroup.Add(current);
-
-            // 检查上下左右四个方向
-            Vector2[] directions = new Vector2[]
-            {
-                new Vector2(0, cellSize),  // 上
-                new Vector2(0, -cellSize), // 下
-                new Vector2(-cellSize, 0), // 左
-                new Vector2(cellSize, 0)   // 右
-            };
-
-            foreach (Vector2 dir in directions)
-            {
-                // 计算相邻位置
-                Vector2 neighbor = current + dir;
-                if (IsPositionValid(neighbor) && !visited.Contains(neighbor))
-                {
-                    // 获取相邻位置的棋子
-                    ChessPiece neighborPiece = GetPiece(neighbor);
-                    if (neighborPiece != null && neighborPiece.color == color)
-                    {
-                        // 将相邻位置加入队列和已访问集合
-                        queue.Enqueue(neighbor);
-                        visited.Add(neighbor);
-                    }
-                }
-            }
-        }
-
-        return connectedGroup;
-    }
-
-    /// <summary>
-    /// 计算连通区域的气
-    /// </summary>
-    private int CalculateLiberties(List<Vector2> group)
-    {
-        // 存储气的位置的哈希集
-        HashSet<Vector2> liberties = new HashSet<Vector2>();
-
-        foreach (Vector2 position in group)
-        {
-            // 检查上下左右四个方向
-            Vector2[] directions = new Vector2[]
-            {
-                new Vector2(0, cellSize),  // 上
-                new Vector2(0, -cellSize), // 下
-                new Vector2(-cellSize, 0), // 左
-                new Vector2(cellSize, 0)   // 右
-            };
-
-            foreach (Vector2 dir in directions)
-            {
-                // 计算相邻位置
-                Vector2 neighbor = position + dir;
-                if (IsPositionValid(neighbor))
-                {
-                    // 获取相邻位置的棋子
-                    ChessPiece neighborPiece = GetPiece(neighbor);
-                    if (neighborPiece == null) // 空位
-                    {
-                        // 将空位加入气的集合
-                        liberties.Add(neighbor);
-                    }
-                }
-            }
-        }
-
-        return liberties.Count;
-    }
-
-    /// <summary>
-    /// 判断连通区域是否被敌方棋子围住
+    /// 判断该位置的棋子（及其连通块）是否被围住。
+    /// 判定已由 ChessPieceMgr 在棋盘变化时统一算好并缓存，这里直接读取，O(1)。
     /// </summary>
     public bool CheckIfSurrounded(Vector2 position)
     {
-        // 获取指定位置的棋子
-        ChessPiece piece = GetPiece(position);
-        if (piece == null)
-            return false;
-
-        if (GameObjectMgr.Instance.AIChess.Count == 81 || GameObjectMgr.Instance.playerChess.Count == 81)
-            return false;
-
-        // 获取连通区域
-        List<Vector2> connectedGroup = GetConnectedGroup(position, piece.color);
-
-        // 计算气
-        int liberties = CalculateLiberties(connectedGroup);
-
-        // 判断是否被围住
-        if (liberties == 0)
-        {
-            foreach (Vector2 position2 in connectedGroup)
-            {
-                ChessPiece piece1 = GetPiece(position2);
-                if (piece1 != null)
-                    piece1.damageBar.gameObject.SetActive(true);
-            }
-            //Debug.Log("棋子或连通区域被围住");
-            return true;
-        }
-        else
-        {
-            foreach (Vector2 position2 in connectedGroup)
-            {
-                ChessPiece piece1 = GetPiece(position2);
-                if (piece1 != null)
-                    piece1.damageBar.gameObject.SetActive(false);
-            }
-            //Debug.Log("棋子或连通区域未被围住");
-            return false;
-        }
+        return ChessPieceMgr.Instance.IsSurroundedAt(position);
     }
 
     /// <summary>
@@ -691,44 +403,6 @@ public class ChessBoard : MonoBehaviour
 
                             if (IsPositionValid(pos))
                                 allPoints.Add(pos);
-                        }
-                    }
-                }
-            }
-        }
-        return allPoints;
-    }
-
-    public List<Vector2> GetDiamondPointsAndroid(Vector2 centerPos, int diamondCount)
-    {
-        List<Vector2> allPoints = new List<Vector2>();
-        Physics2D.SyncTransforms(); // 同步物理状态
-
-        // 使用Floor确保网格坐标一致性
-        int centerX = Mathf.FloorToInt((centerPos.x - boardOffset.x) / cellSize);
-        int centerY = Mathf.FloorToInt((centerPos.y - boardOffset.y) / cellSize);
-
-        for (int atkRange = 1; atkRange <= diamondCount; atkRange++)
-        {
-            for (int y = centerY - atkRange; y <= centerY + atkRange; y++)
-            {
-                for (int x = centerX - atkRange; x <= centerX + atkRange; x++)
-                {
-                    if (Mathf.Abs(x - centerX) + Mathf.Abs(y - centerY) <= atkRange)
-                    {
-                        if (x >= 0 && x < boardWidth && y >= 0 && y < boardHeight)
-                        {
-                            // 直接计算世界坐标，避免累积误差
-                            Vector2 pos = new Vector2(
-                                boardOffset.x + (x * cellSize),
-                                boardOffset.y + (y * cellSize)
-                            );
-
-                            if (IsPositionValid(pos))
-                            {
-                                allPoints.Add(pos);
-                                Debug.Log($"生成攻击点: {pos}"); // 安卓设备调试
-                            }
                         }
                     }
                 }
@@ -782,34 +456,17 @@ public class ChessBoard : MonoBehaviour
         if (GetPiece(position) != null)
             return;
 
+        if (nowLevelRole.Count == 0)
+        {
+            Debug.LogError("本关没有配置可用角色，无法放置敌方棋子");
+            return;
+        }
+
         //随机选择棋子
-
-
         T_Role roleInfo = nowLevelRole[Random.Range(0, nowLevelRole.Count)];
 
-        ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", roleInfo.f_icon, (obj) =>
-        {
-            ChessPiece aiPiece = GameObject.Instantiate(obj, ChessBoard.chessBoard.GetSnappedPosition(position), Quaternion.identity).GetComponent<ChessPiece>();
-            //设置棋子的阵营
-            aiPiece.color = ChessPiece.PieceFaction.Enemy;
-            //初始化棋子的数值
-            aiPiece.SetData(roleInfo);
-            //将棋子添加至容器中，便于管理
-            GameObjectMgr.Instance.AIChess.Add(aiPiece);
-            GameObjectMgr.Instance.allChessList.Add(aiPiece);
-        });
-
-        
-
-    }
-
-    private void DelayDestroyPoints()
-    {
-        foreach (var point in atkPoints)
-        {
-            Destroy(point.gameObject);
-            atkPoints.Remove(point);
-        }
+        //共用一个棋子预制体，生成时按角色动态装配图片与动画
+        ChessPieceMgr.Instance.SpawnPiece(GetSnappedPosition(position), roleInfo, ChessPiece.PieceFaction.Enemy);
     }
 
     public void TrainPlacePlayerPiece(int x, int y)
@@ -817,18 +474,8 @@ public class ChessBoard : MonoBehaviour
         Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
 
         GameObjectMgr.Instance.playerRoleInfo = GameObjectMgr.Instance.AllRoleList[0];
-        ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece", GameObjectMgr.Instance.playerRoleInfo.f_icon, (obj) =>
-        {
-            ChessPiece playerPiece = Instantiate(obj, GetSnappedPosition(position), Quaternion.identity).GetComponent<ChessPiece>();
-            //设置棋子的阵营
-            playerPiece.color = ChessPiece.PieceFaction.Player;
-            //初始化棋子的数值
-            playerPiece.SetData(GameObjectMgr.Instance.playerRoleInfo);
-
-            //将棋子添加至容器中，便于管理
-            GameObjectMgr.Instance.playerChess.Add(playerPiece);
-            GameObjectMgr.Instance.allChessList.Add(playerPiece);
-        });
+        ChessPieceMgr.Instance.SpawnPiece(GetSnappedPosition(position),
+            GameObjectMgr.Instance.playerRoleInfo, ChessPiece.PieceFaction.Player);
     }
 
     public void TrainPlaceAIPiece(int x, int y)
@@ -836,18 +483,8 @@ public class ChessBoard : MonoBehaviour
         Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
 
         GameObjectMgr.Instance.AIRoleInfo = GameObjectMgr.Instance.AllRoleList[0];
-
-        ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", GameObjectMgr.Instance.AIRoleInfo.f_icon, (obj) =>
-        {
-            ChessPiece aiPiece = GameObject.Instantiate(obj, ChessBoard.chessBoard.GetSnappedPosition(position), Quaternion.identity).GetComponent<ChessPiece>();
-            //设置棋子的阵营
-            aiPiece.color = ChessPiece.PieceFaction.Enemy;
-            //初始化棋子的数值
-            aiPiece.SetData(GameObjectMgr.Instance.AIRoleInfo);
-            //将棋子添加至容器中，便于管理
-            GameObjectMgr.Instance.AIChess.Add(aiPiece);
-            GameObjectMgr.Instance.allChessList.Add(aiPiece);
-        });
+        ChessPieceMgr.Instance.SpawnPiece(GetSnappedPosition(position),
+            GameObjectMgr.Instance.AIRoleInfo, ChessPiece.PieceFaction.Enemy);
     }
 
     /// <summary>
@@ -881,24 +518,13 @@ public class ChessBoard : MonoBehaviour
             Vector2 randomPosition = emptyPositions[randomIndex];
 
             T_Role topInfo = GameObjectMgr.Instance.maoDie;
-            ABResMgr.Instance.LoadResAsync<GameObject>("playerpiece",topInfo.f_icon, (obj) =>
+            MusicMgr.Instance.PlaySound("史莱姆落子");
+            //共用一个棋子预制体，生成时按角色动态装配图片与动画
+            ChessPieceMgr.Instance.SpawnPiece(GetSnappedPosition(randomPosition), topInfo, ChessPiece.PieceFaction.Player);
+
+            UIMgr.Instance.GetPanel<GamePanel>(panel =>
             {
-                MusicMgr.Instance.PlaySound("史莱姆落子");
-                ChessPiece playerPiece = Instantiate(obj, GetSnappedPosition(randomPosition), Quaternion.identity).GetComponent<ChessPiece>();
-
-                //设置棋子的阵营
-                playerPiece.color = ChessPiece.PieceFaction.Player;
-                //初始化棋子的数值
-                playerPiece.SetData(topInfo);
-
-                //将棋子添加至容器中，便于管理
-                GameObjectMgr.Instance.playerChess.Add(playerPiece);
-                GameObjectMgr.Instance.allChessList.Add(playerPiece);
-
-                UIMgr.Instance.GetPanel<GamePanel>(panel =>
-                {
-                    panel.ChangeTip(topInfo.f_name);
-                });
+                panel.ChangeTip(topInfo.f_name);
             });
 
 
@@ -917,109 +543,14 @@ public class ChessBoard : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
-            ChessPiece piece = GameObjectMgr.Instance.AIChess[UnityEngine.Random.Range(0, GameObjectMgr.Instance.AIChess.Count)];
-            GameObjectMgr.Instance.AIChess.Remove(piece);
-            GameObjectMgr.Instance.allChessList.Remove(piece);
-            Destroy(piece.gameObject);
+            List<ChessPiece> enemies = GameObjectMgr.Instance.AIChess;
+            if (enemies.Count == 0) break;   // 兜底：不足 10 个时不再取
+
+            ChessPiece piece = enemies[Random.Range(0, enemies.Count)];
+            ChessPieceMgr.Instance.Despawn(piece);   // 注销索引与容器，再销毁
         }
         RandomPlaceTopPiece();
         GameLevelMgr.Instance.SetRelifeIsShow();
     }
 
-    /// <summary>
-    /// 检测可移动点是否已被棋子占满
-    /// </summary>
-    private bool CheckVaildPosIsFull(List<Vector2> vector2s)
-    {
-        bool isFull = true;
-
-        foreach (Vector2 pos in vector2s)
-        {
-            ChessPiece piece = GetPiece(pos);
-            if (piece == null)
-            {
-                isFull = false;
-                break;
-            }
-        }
-        return isFull;
-    }
-
-    private IEnumerator CheckPieceIsOverlap()
-    {
-        while (true)
-        {
-            // 遍历棋盘网格，找到所有空位置
-            for (int x = 0; x < boardWidth; x++)
-            {
-                for (int y = 0; y < boardHeight; y++)
-                {
-                    Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
-                    List<ChessPiece> pieces = GetPiecesOverlap(position);
-                    if (pieces.Count >= 2)
-                    {
-                        foreach (ChessPiece piece in pieces)
-                        {
-                            switch (piece.color)
-                            {
-                                case PieceFaction.Player:
-                                    GameObjectMgr.Instance.playerChess.Remove(piece);
-                                    break;
-                                case PieceFaction.Enemy:
-                                    GameObjectMgr.Instance.AIChess.Remove(piece);
-                                    break;
-                            }
-                            GameObjectMgr.Instance.allChessList.Remove(piece);
-                            Destroy(piece.gameObject);
-                        }
-                    }
-                }
-            }
-            yield return new WaitForSeconds(1f);
-        }
-    }
-
-    public void CheckProximity()
-    {
-
-        for (int i = 0; i < GameObjectMgr.Instance.allChessList.Count - 1; i++)
-        {
-            for (int j = i + 1; j < GameObjectMgr.Instance.allChessList.Count; j++)
-            {
-                Vector2 pos1 = GameObjectMgr.Instance.allChessList[i].transform.position;
-                Vector2 pos2 = GameObjectMgr.Instance.allChessList[j].transform.position;
-                Vector2 diff = pos1 - pos2;
-                float distanceSqr = diff.x * diff.x + diff.y * diff.y;
-                float proximityThresholdSqr = proximityThreshold * proximityThreshold;
-                if (distanceSqr <= proximityThresholdSqr)
-                {
-                    // 这里放置距离满足条件时执行的代码
-                    ChangePiecePos(GameObjectMgr.Instance.allChessList[i]);
-                    ChangePiecePos(GameObjectMgr.Instance.allChessList[j]);
-                }                
-            }
-        }
-
-
-
-    }
-
-    /// <summary>
-    /// 改变重叠棋子的位置
-    /// </summary>
-    /// <param name="piece"></param>
-    private void ChangePiecePos(ChessPiece piece)
-    {
-        // 遍历棋盘网格，找到所有空位置
-        for (int x = 0; x < boardWidth; x++)
-        {
-            for (int y = 0; y < boardHeight; y++)
-            {
-                Vector2 position = new Vector2(boardOffset.x + x * cellSize, boardOffset.y + y * cellSize);
-
-                if(GetPiece(position)==null)
-                    piece.MoveTo(position);
-            }
-        }
-    }
 }

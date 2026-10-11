@@ -8,8 +8,10 @@ using UnityEngine.Events;
 /// </summary>
 public class ABResMgr : BaseManager<ABResMgr>
 {
-    //如果是true会通过EditorResMgr去加载 如果是false会通过ABMgr AB包的形式去加载
-    private bool isDebug = false;
+    //如果是true会通过EditorResMgr去加载（读 Assets/Editor/ArtRes 下的资源，不需要AB包） 如果是false会通过ABMgr AB包的形式去加载
+    //注意：StreamingAssets 里目前只有 Android 平台的AB包，在Windows编辑器里跑必须为true，
+    //否则 ABMgr 会去找 StreamingAssets/PC 找不到，导致UI面板等资源全部加载失败。发布包不受这里影响（外面有 #if UNITY_EDITOR）
+    private bool isDebug = true;
 
     private ABResMgr() { }
 

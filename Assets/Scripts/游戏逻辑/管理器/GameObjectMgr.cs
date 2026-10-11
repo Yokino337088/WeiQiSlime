@@ -32,24 +32,24 @@ public class GameObjectMgr : SingletonAutoMono<GameObjectMgr>
     public T_Role AIRoleInfo;
 
     /// <summary>
-    /// 储存玩家棋子的列表
+    /// 玩家棋子的列表（实际数据由 ChessPieceMgr 统一维护）
     /// </summary>
-    public List<ChessPiece> playerChess = new List<ChessPiece>();
+    public List<ChessPiece> playerChess => ChessPieceMgr.Instance.PlayerPieces;
 
     /// <summary>
-    /// 储存电脑AI棋子的列表
+    /// 电脑AI棋子的列表（实际数据由 ChessPieceMgr 统一维护）
     /// </summary>
-    public List<ChessPiece> AIChess = new List<ChessPiece>();
+    public List<ChessPiece> AIChess => ChessPieceMgr.Instance.EnemyPieces;
 
     /// <summary>
-    /// 储存玩家1棋子的列表
+    /// 玩家1棋子的列表（实际数据由 ChessPieceMgr 统一维护）
     /// </summary>
-    public List<ChessPiece> player1List = new List<ChessPiece>();
+    public List<ChessPiece> player1List => ChessPieceMgr.Instance.Player1Pieces;
 
     /// <summary>
-    /// 储存玩家2棋子的列表
+    /// 玩家2棋子的列表（实际数据由 ChessPieceMgr 统一维护）
     /// </summary>
-    public List<ChessPiece> player2List = new List<ChessPiece>();
+    public List<ChessPiece> player2List => ChessPieceMgr.Instance.Player2Pieces;
 
     /// <summary>
     /// 储存所有角色的列表
@@ -57,9 +57,9 @@ public class GameObjectMgr : SingletonAutoMono<GameObjectMgr>
     public List<T_Role> AllRoleList = new List<T_Role>();
 
     /// <summary>
-    /// 储存所有棋子的列表
+    /// 所有棋子的列表（实际数据由 ChessPieceMgr 统一维护）
     /// </summary>
-    public List<ChessPiece> allChessList = new List<ChessPiece>();
+    public List<ChessPiece> allChessList => ChessPieceMgr.Instance.AllPieces;
 
     /// <summary>
     /// 储存7级兵种的列表
@@ -91,44 +91,15 @@ public class GameObjectMgr : SingletonAutoMono<GameObjectMgr>
     }
 
     /// <summary>
-    /// 清除场景上棋子的方法
+    /// 清除场景上棋子的方法（销毁、各阵营容器与棋盘索引统一由 ChessPieceMgr 处理）
     /// </summary>
     public void ClearPiece()
     {
-        foreach (var piece in playerChess)
-        {
-            Destroy(piece.gameObject);
-        }
-        playerChess.Clear();
-        foreach (var piece in AIChess)
-        {
-            Destroy(piece.gameObject);
-        }
-        AIChess.Clear();
-        foreach(var piece in player1List)
-        {
-            Destroy(piece.gameObject);
-        }
-        player1List.Clear();
-        foreach (var piece in player2List)
-        {
-            Destroy(piece.gameObject);
-        }
-        player2List.Clear();
-        foreach (var piece in allChessList)
-        {
-            Destroy(piece.gameObject);
-        }
-        allChessList.Clear();
+        ChessPieceMgr.Instance.ClearAll();
     }
-
-
 
     public void ClearObject()
     {
-        allChessList.Clear();
-        AIChess.Clear();
-        playerChess.Clear();
         MusicMgr.Instance.ClearSound();
         PoolMgr.Instance.ClearPool();
     }

@@ -16,6 +16,8 @@ public class ABMgr : SingletonAutoMono<ABMgr>
     private AssetBundle mainAB = null;
     //主包依赖获取配置文件
     private AssetBundleManifest manifest = null;
+    //主包加载失败过一次（避免重复刷错误日志）
+    private bool isMainABFailed = false;
 
     //选择存储 AB包的容器
     //AB包不能够重复加载 否则会报错
@@ -55,23 +57,35 @@ public class ABMgr : SingletonAutoMono<ABMgr>
     /// 因为加载所有包是 都得判断 通过它才能得到依赖信息
     /// 所以写一个方法
     /// </summary>
-    private void LoadMainAB()
+    private bool LoadMainAB()
     {
+        if (mainAB != null) return manifest != null;
+
+        //记录一次失败 避免每次加载资源都刷同样的错误
+        if (isMainABFailed) return false;
+
+        mainAB = AssetBundle.LoadFromFile(PathUrl + MainName);
         if (mainAB == null)
         {
-            mainAB = AssetBundle.LoadFromFile(PathUrl + MainName);
-            manifest = mainAB.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+            isMainABFailed = true;
+            Debug.LogError($"找不到 {MainName} 平台的AB主包：{PathUrl + MainName}\n" +
+                           "编辑器里测试请把 ABResMgr 的 isDebug 设为 true（改成读 Assets/Editor/ArtRes 下的资源），" +
+                           "或者用 AssetBundle Browser 打包当前平台（输出到 StreamingAssets）后再运行");
+            return false;
         }
+
+        manifest = mainAB.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+        return manifest != null;
     }
 
     /// <summary>
     /// 加载指定包的依赖包
     /// </summary>
     /// <param name="abName"></param>
-    private void LoadDependencies(string abName)
+    private bool LoadDependencies(string abName)
     {
         //加载主包
-        LoadMainAB();
+        if (!LoadMainAB()) return false;
         //获取依赖包
         string[] strs = manifest.GetAllDependencies(abName);
         for (int i = 0; i < strs.Length; i++)
@@ -82,6 +96,7 @@ public class ABMgr : SingletonAutoMono<ABMgr>
                 abDic.Add(strs[i], ab);
             }
         }
+        return true;
     }
 
     /// <summary>
@@ -94,7 +109,7 @@ public class ABMgr : SingletonAutoMono<ABMgr>
     public T LoadRes<T>(string abName, string resName) where T : Object
     {
         //加载依赖包
-        LoadDependencies(abName);
+        if (!LoadDependencies(abName)) return null;
         //加载目标包
         if (!abDic.ContainsKey(abName))
         {
@@ -181,8 +196,8 @@ public class ABMgr : SingletonAutoMono<ABMgr>
     //正儿八经的 协程函数
     private IEnumerator ReallyLoadResAsync<T>(string abName, string resName, UnityAction<T> callBack, bool isSync) where T : Object
     {
-        //加载主包
-        LoadMainAB();
+        //加载主包（拿不到主包就直接结束，避免后面的空引用把真正的原因盖掉）
+        if (!LoadMainAB()) yield break;
         //获取依赖包
         string[] strs = manifest.GetAllDependencies(abName);
         for (int i = 0; i < strs.Length; i++)
@@ -280,8 +295,8 @@ public class ABMgr : SingletonAutoMono<ABMgr>
 
     private IEnumerator ReallyLoadResAsync(string abName, string resName, System.Type type, UnityAction<Object> callBack, bool isSync)
     {
-        //加载主包
-        LoadMainAB();
+        //加载主包（拿不到主包就直接结束，避免后面的空引用把真正的原因盖掉）
+        if (!LoadMainAB()) yield break;
         //获取依赖包
         string[] strs = manifest.GetAllDependencies(abName);
         for (int i = 0; i < strs.Length; i++)
@@ -377,8 +392,8 @@ public class ABMgr : SingletonAutoMono<ABMgr>
 
     private IEnumerator ReallyLoadResAsync(string abName, string resName, UnityAction<Object> callBack, bool isSync)
     {
-        //加载主包
-        LoadMainAB();
+        //加载主包（拿不到主包就直接结束，避免后面的空引用把真正的原因盖掉）
+        if (!LoadMainAB()) yield break;
         //获取依赖包
         string[] strs = manifest.GetAllDependencies(abName);
         for (int i = 0; i < strs.Length; i++)

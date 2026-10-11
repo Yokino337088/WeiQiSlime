@@ -111,21 +111,10 @@ public class MeleePlaceState : BaseState
         if (ChessBoard.chessBoard.GetPiece(position) != null)
             return;
 
-        ABResMgr.Instance.LoadResAsync<GameObject>("enemypiece", GameObjectMgr.Instance.AIRoleInfo.f_icon, (obj) =>
-        {
-            MusicMgr.Instance.PlaySound("史莱姆落子");
-
-            ChessPiece aiPiece = GameObject.Instantiate(obj, ChessBoard.chessBoard.GetSnappedPosition(position), Quaternion.identity).GetComponent<ChessPiece>();
-            //设置棋子的阵营
-            aiPiece.color = ChessPiece.PieceFaction.Enemy;
-            //初始化棋子的数值
-            aiPiece.SetData(GameObjectMgr.Instance.AIRoleInfo);
-            aiPiece.needCheckSurrounding = true;
-            //将棋子添加至容器中，便于管理
-            GameObjectMgr.Instance.AIChess.Add(aiPiece);
-            GameObjectMgr.Instance.allChessList.Add(aiPiece);
-            
-        });
+        MusicMgr.Instance.PlaySound("史莱姆落子");
+        //共用一个棋子预制体，生成时按角色动态装配图片与动画
+        ChessPieceMgr.Instance.SpawnPiece(ChessBoard.chessBoard.GetSnappedPosition(position),
+            GameObjectMgr.Instance.AIRoleInfo, ChessPiece.PieceFaction.Enemy);
 
         GameDataMgr.Instance.AICoin -= GameObjectMgr.Instance.AIRoleInfo.f_exp;
         UIMgr.Instance.GetPanel<GamePanel>((panel) =>

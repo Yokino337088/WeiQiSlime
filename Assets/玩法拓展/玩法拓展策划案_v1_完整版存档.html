@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>围棋史莱姆 · 玩法拓展策划案（肉鸽 × 自走棋 × 围棋）</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --card:#ffffff; --ink:#1c2024; --ink2:#3d4852; --sub:#6b7785;
+    --line:#e8e4dc; --line2:#f1eee8;
+    --ink-blue:#2c4a5e; --jade:#2f7a63; --cinnabar:#c0392b; --amber:#b7791f; --violet:#6b46c1;
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;padding:0;background:var(--paper);color:var(--ink);
+    font:15.5px/1.85 "Microsoft YaHei","PingFang SC",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:1120px;margin:0 auto;padding:48px 26px 80px}
+
+  /* 标题 */
+  header{border-bottom:2px solid var(--ink);padding-bottom:22px;margin-bottom:8px}
+  .kicker{font-size:12.5px;letter-spacing:.22em;color:var(--sub);text-transform:uppercase}
+  h1{
+    font:600 33px/1.35 Georgia,"Songti SC","STSong",serif;
+    margin:10px 0 6px;letter-spacing:.01em;
+  }
+  h1 .en{display:block;font-size:15px;font-weight:400;color:var(--sub);letter-spacing:.06em;margin-top:8px;font-family:Georgia,serif}
+  .lede{font-size:16px;color:var(--ink2);margin:14px 0 0;max-width:76ch}
+  .meta{font-size:13px;color:var(--sub);margin-top:16px;display:flex;flex-wrap:wrap;gap:8px 18px}
+  .meta b{color:var(--ink2);font-weight:600}
+
+  /* 目录 */
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 22px;margin:26px 0 6px}
+  nav.toc h2{font-size:13px;letter-spacing:.16em;color:var(--sub);margin:0 0 10px;font-weight:600;text-transform:uppercase}
+  nav.toc ol{margin:0;padding-left:20px;columns:2;column-gap:34px;font-size:14px}
+  nav.toc li{margin:3px 0;break-inside:avoid}
+  nav.toc a{color:var(--ink2);text-decoration:none;border-bottom:1px dotted transparent}
+  nav.toc a:hover{color:var(--cinnabar);border-bottom-color:var(--cinnabar)}
+
+  h2.sec{
+    font:600 23px/1.4 Georgia,"Songti SC","STSong",serif;
+    margin:52px 0 6px;padding-top:20px;border-top:1px solid var(--line);
+    display:flex;align-items:baseline;gap:12px;
+  }
+  h2.sec .n{font-size:14px;color:var(--cinnabar);letter-spacing:.05em;font-family:Georgia,serif}
+  h2.sec + .sub{color:var(--sub);font-size:13.5px;margin:0 0 18px}
+  h3{font-size:17px;margin:30px 0 10px;padding-left:11px;border-left:3px solid var(--ink-blue);font-weight:600}
+  h4{font-size:15px;margin:20px 0 8px;color:var(--ink2)}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0 10px 22px;padding:0}
+  li{margin:5px 0}
+  a{color:var(--ink-blue)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;margin:16px 0;
+        box-shadow:0 1px 2px rgba(28,32,36,.03)}
+  .card.tight{padding:16px 20px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  @media(max-width:820px){.grid2{grid-template-columns:1fr}nav.toc ol{columns:1}}
+
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0;background:var(--card)}
+  caption{caption-side:top;text-align:left;font-size:13px;color:var(--sub);padding-bottom:8px}
+  th,td{padding:9px 12px;border-bottom:1px solid var(--line2);text-align:left;vertical-align:top}
+  thead th{background:#f7f5f0;color:var(--ink2);font-weight:600;border-bottom:1px solid var(--line);white-space:nowrap}
+  tbody tr:hover{background:#fdfcf9}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+  code{background:#f2efe9;padding:1px 6px;border-radius:5px;font:13px/1.6 Consolas,"Courier New",monospace;color:#4a3728}
+  .chip{display:inline-block;padding:1.5px 9px;border-radius:99px;font-size:12.5px;font-weight:600;line-height:1.7;white-space:nowrap}
+  .c-blue{background:#e8f0f7;color:var(--ink-blue)}
+  .c-jade{background:#e6f4ee;color:var(--jade)}
+  .c-red{background:#fbeae8;color:var(--cinnabar)}
+  .c-amber{background:#fbf3e3;color:var(--amber)}
+  .c-violet{background:#f0eafb;color:var(--violet)}
+  .c-gray{background:#f0f1f3;color:var(--sub)}
+
+  blockquote{margin:16px 0;padding:12px 18px;background:#f9f8f4;border-left:3px solid var(--amber);color:var(--ink2);font-size:14.5px}
+  blockquote p{margin:6px 0}
+  .note{font-size:13px;color:var(--sub)}
+  .warn{border-left-color:var(--cinnabar);background:#fdf6f5}
+
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px}
+  .kpi .v{font:600 22px/1.3 Georgia,serif;color:var(--ink-blue)}
+  .kpi .l{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .kpi .d{font-size:12.5px;color:var(--ink2);margin-top:6px}
+
+  .loop{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}
+  .loop .item{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;position:relative}
+  .loop .item .t{font-weight:600;font-size:15px}
+  .loop .item .s{color:var(--sub);font-size:12.5px}
+  .loop .item .b{font-size:13.5px;color:var(--ink2);margin-top:8px}
+  .loop .item .dot{position:absolute;right:14px;top:14px;width:9px;height:9px;border-radius:50%}
+  @media(max-width:820px){.loop{grid-template-columns:1fr}}
+
+  .road{position:relative;margin:24px 0 8px;padding-left:26px}
+  .road:before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line)}
+  .road .step{position:relative;margin:0 0 20px}
+  .road .step:before{content:"";position:absolute;left:-24px;top:7px;width:11px;height:11px;border-radius:50%;background:#fff;border:2.5px solid var(--ink-blue)}
+  .road .step.p0:before{border-color:var(--jade)}
+  .road .step.p1:before{border-color:var(--ink-blue)}
+  .road .step.p2:before{border-color:var(--amber)}
+  .road .step.p3:before{border-color:var(--violet)}
+  .road .step h4{margin:0 0 4px}
+  .road .step .dur{font-size:12.5px;color:var(--sub)}
+
+  figure{margin:20px 0}
+  figure svg{display:block;width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+  figcaption{font-size:12.5px;color:var(--sub);margin-top:8px;text-align:center}
+
+  footer{margin-top:60px;padding-top:18px;border-top:1px solid var(--line);color:var(--sub);font-size:12.5px}
+  .sep{height:1px;background:var(--line);margin:30px 0}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="kicker">Game Design Document · v1.0</div>
+  <h1>围棋史莱姆 · 玩法拓展策划案
+    <span class="en">Slime Go — Roguelike Expedition × Auto-Battler × Go</span>
+  </h1>
+  <p class="lede">
+    把现在的「单关与 AI 对弈」升级成<strong>一局 30~45 分钟的肉鸽远征</strong>：
+    用<strong>自走棋</strong>的商店 / 三合一 / 羁绊 / 装备做构筑骨架，
+    用<strong>围棋</strong>的气、提子、眼位、打劫、地盘做战斗内核，
+    用<strong>肉鸽</strong>的随机地图、遗物、事件、AI 人格做每局差异。
+  </p>
+  <div class="meta">
+    <span><b>工程</b> 围棋史莱姆（Unity 2022.3.15f1c1）</span>
+    <span><b>日期</b> 2026-10-11</span>
+    <span><b>棋盘</b> 9×9 / 81 格</span>
+    <span><b>角色</b> 65 个 · 4 职业 · 3 档</span>
+    <span><b>性能余量</b> 满盘 60 棋子主线程 4.2–4.8 ms</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>目录</h2>
+  <ol>
+    <li><a href="#s1">现状诊断：为什么"有点单调"</a></li>
+    <li><a href="#s2">新定位与一句话卖点</a></li>
+    <li><a href="#s3">三层玩法循环</a></li>
+    <li><a href="#s4">肉鸽层：远征地图与节点</a></li>
+    <li><a href="#s5">自走棋层：商店 · 刷新 · 三合一 · 装备</a></li>
+    <li><a href="#s6">羁绊系统（职业 × 种族 双轴）</a></li>
+    <li><a href="#s7">围棋内核：气 · 提子 · 眼位 · 打劫 · 地盘</a></li>
+    <li><a href="#s8">遗物系统（50+，规则级改造）</a></li>
+    <li><a href="#s9">局内天赋三选一</a></li>
+    <li><a href="#s10">AI 人格：把"一个状态机"变成 8 个对手</a></li>
+    <li><a href="#s11">经济与节奏数值</a></li>
+    <li><a href="#s12">局外 Meta：师门 · 棋谱 · 每日棋局 · 天梯</a></li>
+    <li><a href="#s13">界面与表现（复用现有美术）</a></li>
+    <li><a href="#s14">现有代码复用对照表</a></li>
+    <li><a href="#s15">开发路线图 P0–P3</a></li>
+    <li><a href="#s16">风险、取舍与验证指标</a></li>
+    <li><a href="#s17">附录：术语与对标</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<h2 class="sec" id="s1"><span class="n">01</span>现状诊断：为什么"有点单调"</h2>
+<p class="sub">先承认现有的底子是好的：它其实已经是一个"围棋 × 自走棋"的雏形，只是缺了构筑与随机性这两条腿。</p>
+
+<div class="grid3">
+  <div class="kpi"><div class="v">9×9</div><div class="l">棋盘 / 81 格</div><div class="d">气、连通块、被围判定的天然载体</div></div>
+  <div class="kpi"><div class="v">65</div><div class="l">角色 · 4 职业 · 3 档</div><div class="d">近战 / 弓箭 / 法师 / 补给车</div></div>
+  <div class="kpi"><div class="v">1.5s / 5</div><div class="l">行动力回复 / 上限</div><div class="d">已经在做"节奏控制"这件事</div></div>
+  <div class="kpi"><div class="v">600s</div><div class="l">单局时限</div><div class="d">20 秒后开始判胜负</div></div>
+</div>
+
+<h3>四个"单调"的根因</h3>
+<table>
+  <thead><tr><th style="width:150px">根因</th><th>表现</th><th>本质</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>决策维度单一</b></td>
+      <td>每回合能做的只有"落哪个棋子、落在哪一格"</td>
+      <td>没有<strong>构筑</strong>（Build）：选择之间不产生组合效应，没有"1+1&gt;2"的爽点</td>
+    </tr>
+    <tr>
+      <td><b>局内没有成长曲线</b></td>
+      <td>金币只用来落子，落完就结束；赢了直接进结算</td>
+      <td>没有<strong>滚雪球</strong>：玩家感受不到"我这局变强了"</td>
+    </tr>
+    <tr>
+      <td><b>每局都在重演</b></td>
+      <td>同一关卡的敌人阵容、落子节奏、胜负线完全一致</td>
+      <td>没有<strong>随机性</strong>：没有事件、没有遗物、没有"这局我抽到了什么"</td>
+    </tr>
+    <tr>
+      <td><b>对手没有性格</b></td>
+      <td>AI 走「选棋 → 落子 → 移动」的固定状态机，行为可预测</td>
+      <td>没有<strong>对抗叙事</strong>：玩家不会说"这个 AI 好阴"，只会说"它又这样落"</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><b>设计原则（贯穿全文）</b>：不做"另一款自走棋"，也不做"更硬的围棋"。要把现有的<strong>气 / 被围</strong>这一条规则放大成战斗内核——让"站位"同时是自走棋的阵型与围棋的生死，这才是本作不可替代的地方。</p>
+</blockquote>
+
+<!-- 2 -->
+<h2 class="sec" id="s2"><span class="n">02</span>新定位与一句话卖点</h2>
+<div class="card">
+  <p style="font-size:17px;margin-top:0"><b>《围棋史莱姆 · 弈境远征》</b>——带一队史莱姆棋手，闯过一张随机棋局地图；每一格落子的位置，既是阵型，也是死活。</p>
+  <table>
+    <thead><tr><th style="width:120px">关键词</th><th>在本作中的具体含义</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-red">肉鸽</span></td><td>随机节点地图 + 遗物 + 事件残局 + 局内天赋，输了一局从头再来但带走局外成长</td></tr>
+      <tr><td><span class="chip c-blue">自走棋</span></td><td>商店刷新 / 三合一升星 / 职业与种族羁绊 / 装备合成 / 站位策略</td></tr>
+      <tr><td><span class="chip c-jade">围棋</span></td><td>气数可视化、气尽提子、双眼活棋、打劫、地盘计分、棋形加成</td></tr>
+      <tr><td><span class="chip c-amber">轻量</span></td><td>单节点 2~3 分钟、单手可玩、失败可续命；不引入复杂的围棋收官与打劫规则细节</td></tr>
+    </tbody>
+  </table>
+  <p class="note" style="margin-bottom:0"><b>和竞品的差异</b>：市面上的"围棋 + 自走棋"要么把围棋当皮（棋盘只是网格），要么把围棋当核（门槛劝退）。本作用一条折中线：<b>围棋只保留气、提子、眼位、打劫、地盘五个最直觉的机制</b>，其余留给自走棋的构筑深度。</p>
+</div>
+
+<!-- 3 -->
+<h2 class="sec" id="s3"><span class="n">03</span>三层玩法循环</h2>
+<p class="sub">三层循环各自有独立的"爽点"，并且互不阻塞——P0 只做第二层就能显著改变观感。</p>
+
+<div class="loop">
+  <div class="item"><span class="dot" style="background:var(--cinnabar)"></span>
+    <div class="t">① 秒级：战局循环</div><div class="s">5~20 秒</div>
+    <div class="b">落子 → 自动攻防 → 气数变化 → <b>提子</b>。玩家看到的是"围"的血色脉冲与拔花特效。</div>
+  </div>
+  <div class="item"><span class="dot" style="background:var(--ink-blue)"></span>
+    <div class="t">② 分钟级：构筑循环</div><div class="s">2~3 分钟 / 节点</div>
+    <div class="b">打一个节点 → 拿金币与遗物 → 商店买棋 / 刷新 / 三合一 → <b>这一局的 Build 成形</b>。</div>
+  </div>
+  <div class="item"><span class="dot" style="background:var(--jade)"></span>
+    <div class="t">③ 局级：远征循环</div><div class="s">30~45 分钟 / 局</div>
+    <div class="b">3 章 × 5~8 节点 → 章节 Boss → 通关带走<b>棋谱（局外解锁）与称号</b>。</div>
+  </div>
+</div>
+
+<figure>
+  <svg viewBox="0 0 1040 300" role="img" aria-label="三层循环示意图">
+    <defs>
+      <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+        <path d="M0,0 L0,6 L8,3 z" fill="#6b7785"/>
+      </marker>
+    </defs>
+    <rect x="24" y="40" width="290" height="210" rx="12" fill="#fdf5f4" stroke="#f0d9d6"/>
+    <text x="169" y="70" text-anchor="middle" font-size="15" font-weight="600" fill="#c0392b">战局：一气之争</text>
+    <text x="169" y="98" text-anchor="middle" font-size="13" fill="#3d4852">落子 · 攻防 · 气数脉冲</text>
+    <text x="169" y="122" text-anchor="middle" font-size="13" fill="#3d4852">提子 · 打劫 · 活棋</text>
+    <text x="169" y="152" text-anchor="middle" font-size="12" fill="#6b7785">产出：金币 · 棋魂 · 经验</text>
+    <circle cx="169" cy="196" r="26" fill="#fff" stroke="#c0392b" stroke-width="2"/>
+    <text x="169" y="201" text-anchor="middle" font-size="12" fill="#c0392b">5~20s</text>
+
+    <rect x="375" y="40" width="290" height="210" rx="12" fill="#f4f8fb" stroke="#d6e3ee"/>
+    <text x="520" y="70" text-anchor="middle" font-size="15" font-weight="600" fill="#2c4a5e">构筑：一局之形</text>
+    <text x="520" y="98" text-anchor="middle" font-size="13" fill="#3d4852">商店刷新 · 三合一升星</text>
+    <text x="520" y="122" text-anchor="middle" font-size="13" fill="#3d4852">羁绊 · 装备 · 三选一天赋</text>
+    <text x="520" y="152" text-anchor="middle" font-size="12" fill="#6b7785">产出：Build 强度 · 遗物</text>
+    <circle cx="520" cy="196" r="26" fill="#fff" stroke="#2c4a5e" stroke-width="2"/>
+    <text x="520" y="201" text-anchor="middle" font-size="12" fill="#2c4a5e">2~3min</text>
+
+    <rect x="726" y="40" width="290" height="210" rx="12" fill="#f3faf6" stroke="#d5eade"/>
+    <text x="871" y="70" text-anchor="middle" font-size="15" font-weight="600" fill="#2f7a63">远征：一境之路</text>
+    <text x="871" y="98" text-anchor="middle" font-size="13" fill="#3d4852">3 章随机地图 · 事件残局</text>
+    <text x="871" y="122" text-anchor="middle" font-size="13" fill="#3d4852">精英 · 商店 · Boss</text>
+    <text x="871" y="152" text-anchor="middle" font-size="12" fill="#6b7785">产出：棋谱 · 称号 · 师门经验</text>
+    <circle cx="871" cy="196" r="26" fill="#fff" stroke="#2f7a63" stroke-width="2"/>
+    <text x="871" y="201" text-anchor="middle" font-size="12" fill="#2f7a63">30~45min</text>
+
+    <line x1="322" y1="145" x2="368" y2="145" stroke="#6b7785" stroke-width="1.5" marker-end="url(#ar)"/>
+    <line x1="673" y1="145" x2="719" y2="145" stroke="#6b7785" stroke-width="1.5" marker-end="url(#ar)"/>
+
+    <path d="M871 252 L871 274 L169 274 L169 258" fill="none" stroke="#6b7785" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+    <text x="520" y="292" text-anchor="middle" font-size="12" fill="#6b7785">局外成长回流（师门 / 棋谱 / 遗物池扩展）</text>
+  </svg>
+  <figcaption>图 1：三层循环。战局产出资源 → 构筑消费资源 → 远征产出局外成长。</figcaption>
+</figure>
+
+<!-- 4 -->
+<h2 class="sec" id="s4"><span class="n">04</span>肉鸽层：远征地图与节点</h2>
+<p class="sub">一局 = 3 章 × 5~8 节点，节点从下往上推进，每章末尾一个 Boss。地图随机生成但**同一种子的结果固定**（为每日棋局/回放打基础）。</p>
+
+<table>
+  <caption>节点类型表（数值为第 1 章基准，第 2/3 章按 ×1.6 / ×2.5 缩放）</caption>
+  <thead><tr><th>节点</th><th class="num">出现率</th><th>内容</th><th class="num">时长</th><th>产出</th></tr></thead>
+  <tbody>
+    <tr><td><span class="chip c-gray">普通战斗</span></td><td class="num">45%</td><td>随机敌人阵容 + 随机盘面（星位盘 / 三三盘 / 空盘）</td><td class="num">2 分钟</td><td>金币 5~8 · 经验 1</td></tr>
+    <tr><td><span class="chip c-blue">精英战斗</span></td><td class="num">12%</td><td>带专属遗物的强化敌人（如"劫匪"）</td><td class="num">3 分钟</td><td>遗物 1 · 金币 10</td></tr>
+    <tr><td><span class="chip c-jade">残局事件</span></td><td class="num">12%</td><td>棋盘给出固定残局（死活题 / 提子题），限时解出</td><td class="num">1.5 分钟</td><td>遗物 / 金币 / 免费棋子</td></tr>
+    <tr><td><span class="chip c-amber">商店</span></td><td class="num">12%</td><td>买棋子 / 装备 / 道具，可刷新，可锁牌</td><td class="num">1 分钟</td><td>—（消费）</td></tr>
+    <tr><td><span class="chip c-amber">铁匠铺</span></td><td class="num">8%</td><td>合成装备、升星、卖出棋子、移除负面遗物</td><td class="num">2 分钟</td><td>—（消费）</td></tr>
+    <tr><td><span class="chip c-violet">宝箱 / 祝福</span></td><td class="num">8%</td><td>三选一：天赋 / 遗物 / 大额金币</td><td class="num">30 秒</td><td>三选一</td></tr>
+    <tr><td><span class="chip c-red">Boss</span></td><td class="num">1 / 章</td><td>专属 AI 人格 + 特殊棋盘规则（如"禁入区逐回合扩大"）</td><td class="num">4 分钟</td><td>章节奖励 · 棋谱残页</td></tr>
+  </tbody>
+</table>
+
+<h3>盘面变体（地图随机性的一大来源，成本极低）</h3>
+<div class="grid2">
+  <div class="card tight">
+    <h4 style="margin-top:0">已有 9×9 棋盘的四类改造</h4>
+    <ul style="margin-bottom:0">
+      <li><b>星位盘</b>：4 个星位格（天元、四星）落子攻速 +30%</li>
+      <li><b>劫争盘</b>：中央 3×3 为劫争区，区内被提子立刻返还 50% 金币</li>
+      <li><b>封锁盘</b>：随机 4~8 格不可落子（等于改变气路，围棋味极强）</li>
+      <li><b>潮汐盘</b>：每 30 秒边缘一圈格子沉没/回升</li>
+    </ul>
+  </div>
+  <div class="card tight">
+    <h4 style="margin-top:0">为什么值得做</h4>
+    <p style="margin:0 0 6px">盘面变体是"最低成本的高随机性"：<b>不用新增美术、不用新增棋子</b>，只改棋盘数据与判定，就能让每局的开局感完全不同，并且天然强化了"气 / 连通"这条围棋内核。</p>
+    <p class="note" style="margin-bottom:0">实现上只需给棋盘加一份"格子属性表"（可落 / 加成类型），现有 <code>IsPositionValid</code> 与棋盘索引直接扩展即可。</p>
+  </div>
+</div>
+
+<!-- 5 -->
+<h2 class="sec" id="s5"><span class="n">05</span>自走棋层：商店 · 刷新 · 三合一 · 装备</h2>
+<p class="sub">这是把"落子"从一次性选择变成 Build 过程的关键一层，也是改造性价比最高的部分。</p>
+
+<h3>5.1 商店（把现有酒馆升级成每节点的商店）</h3>
+<table>
+  <thead><tr><th>机制</th><th>规则</th><th>设计意图</th></tr></thead>
+  <tbody>
+    <tr><td>候选牌</td><td>每次进店 5 张随机棋子（+1 张随章节提升），可锁牌</td><td>制造"抽到什么"的随机爽点</td></tr>
+    <tr><td>刷新</td><td>2 金币 / 次，每章首次免费；<span class="chip c-gray">遗物</span>可改价（如"众叛：免费但 +30% 售价"）</td><td>金币的去处从"只落子"变成"落子 vs 刷新"的取舍</td></tr>
+    <tr><td>稀有度</td><td><span class="chip c-gray">白 60%</span> <span class="chip c-blue">蓝 30%</span> <span class="chip c-violet">紫 8%</span> <span class="chip c-amber">橙 2%</span>（每章提升一档）</td><td>与现有 4 职业 × 3 档美术天然对应</td></tr>
+    <tr><td>价格</td><td>白 3 / 蓝 5 / 紫 8 / 橙 12 金币（对齐现有角色的 <code>f_exp</code> 成本）</td><td>不新增经济概念，复用现有落子花费</td></tr>
+    <tr><td>手牌</td><td>上限 8；上场上限 = 8 + 羁绊加成</td><td>给"棋盘铺满 81 格"留空间，但不让开局就铺满</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 三合一升星（现有美术已完全就绪）</h3>
+<div class="card">
+  <p style="margin-top:0">现有 65 个角色正好是 <b>19 个系 × 3 个档位</b>（例如 刺客1 / 刺客2 / 刺客3），美术、帧动画、底座与被围标识<b>三档都已经画好</b>。这意味着"三合一升星"不需要任何新美术：</p>
+  <table style="margin-bottom:6px">
+    <thead><tr><th>合成</th><th>结果</th><th>属性倍率</th><th>表现</th></tr></thead>
+    <tbody>
+      <tr><td>3 × 同名 1 星</td><td>1 个 2 星</td><td>攻击 ×1.8 · 生命 ×2.0</td><td>直接切到第 2 档立绘帧序列</td></tr>
+      <tr><td>3 × 同名 2 星</td><td>1 个 3 星</td><td>攻击 ×3.2 · 生命 ×3.6</td><td>第 3 档立绘 + 底座光环 + 专属技能特效</td></tr>
+      <tr><td>3 星专属</td><td>解锁该角色"棋灵技"</td><td>—</td><td>例：刺客 3 星 → 提子后瞬移到空位（复用移动力 <code>f_move</code>）</td></tr>
+    </tbody>
+  </table>
+  <p class="note" style="margin-bottom:0">这张表把"升星"从数值系统变成<b>可直接复用现有资源</b>的表现系统——是全文里性价比最高的一条。</p>
+</div>
+
+<h3>5.3 装备与合成（装备槽 = "棋石"）</h3>
+<table>
+  <thead><tr><th>部位</th><th>基础效果</th><th>三合一产物</th></tr></thead>
+  <tbody>
+    <tr><td>攻（墨石）</td><td>攻击 +12%</td><td>砚台：攻击 +12% 且每 3 次攻击造成 1 格溅射</td></tr>
+    <tr><td>守（玉石）</td><td>生命 +15%</td><td>棋盘：生命 +15% 且首次致死改为保留 1 血</td></tr>
+    <tr><td>速（竹石）</td><td>攻速 +10%</td><td>折扇：攻速 +10%，提子后攻速翻倍 3 秒</td></tr>
+    <tr><td>气（云石）</td><td>所在连通块气 +1（虚气，仅用于判定）</td><td>云海：全队气判定 +1（被围更难）</td></tr>
+  </tbody>
+</table>
+<p class="note">"气石"是围棋味的装备轴：它不直接给数值，而是改变<strong>被围判定</strong>，让装备选择与站位产生耦合。</p>
+
+<!-- 6 -->
+<h2 class="sec" id="s6"><span class="n">06</span>羁绊系统（职业 × 种族 双轴）</h2>
+<p class="sub">现有数据表里已经有 <code>f_profession</code>（职业）与 <code>f_zhongzu</code>（种族）两个字段——羁绊几乎是"免费"的：只需要给表补效果列。</p>
+
+<h3>6.1 职业羁绊（横轴：怎么打）</h3>
+<table>
+  <thead><tr><th>职业</th><th>2 人</th><th>4 人</th><th>6 人</th></tr></thead>
+  <tbody>
+    <tr><td><b>近战</b>（1）</td><td>护甲 +15%</td><td>受击反弹 20% 伤害</td><td>每场首次致死免疫并回满血</td></tr>
+    <tr><td><b>弓箭</b>（2）</td><td>射程 +1 格</td><td>暴击率 +25%</td><td>每次攻击额外射出一箭（50% 伤害）</td></tr>
+    <tr><td><b>法师</b>（3）</td><td>技能频率 +20%</td><td>技能范围 +1 格</td><td>施法后目标眩晕 1 秒</td></tr>
+    <tr><td><b>补给车</b>（4）</td><td>每回合 +1 金币</td><td>每回合全队回血 3%</td><td>全队行动力 +1</td></tr>
+    <tr><td><b>棋手</b>（新增 5）</td><td>落子后该棋子 +1 气</td><td>提子时全队回血 10%</td><td>每回合可免费移动 1 次</td></tr>
+    <tr><td><b>妖灵</b>（新增 6）</td><td>生命 +20%</td><td>死亡时对相邻格造成伤害</td><td>每场复活 1 次（半血）</td></tr>
+  </tbody>
+</table>
+
+<h3>6.2 种族羁绊（纵轴：怎么活）</h3>
+<table>
+  <thead><tr><th>种族</th><th>2 人</th><th>4 人</th><th>玩法身份</th></tr></thead>
+  <tbody>
+    <tr><td><b>史莱姆</b></td><td>被攻击时 20% 分裂出 1 星幼体</td><td>分裂概率 40%，幼体继承 30% 攻击</td><td>铺场 / 气路填充流</td></tr>
+    <tr><td><b>机关</b></td><td>免疫位移，技能伤害 -30%</td><td>被提子时对提子方造成 1 格伤害</td><td>反制提子流</td></tr>
+    <tr><td><b>仙门</b></td><td>每 3 次落子触发"天道"（随机 1 格伤害）</td><td>天道改为 2 格且附加眩晕</td><td>节奏型 AOE</td></tr>
+    <tr><td><b>亡灵</b></td><td>阵亡 5 秒后以 50% 血复活（每场 1 次）</td><td>复活后攻速 +40%</td><td>消耗战 / 拖时间</td></tr>
+    <tr><td><b>妖兽</b></td><td>击杀后永久 +5% 攻击（本局累积）</td><td>+10%，且提子也能叠加</td><td>滚雪球</td></tr>
+    <tr><td><b>棋灵</b></td><td>与相邻我方共享 30% 伤害</td><td>共享 50%，且共享范围内气共用</td><td>围棋味最重的流派</td></tr>
+  </tbody>
+</table>
+<p class="note">「棋灵」的"<b>气共用</b>"是羁绊与围棋规则的正交设计：它让"抱团"既有自走棋的坦度收益，也直接改变围棋的死活判定。</p>
+
+<!-- 7 -->
+<h2 class="sec" id="s7"><span class="n">07</span>围棋内核：气 · 提子 · 眼位 · 打劫 · 地盘</h2>
+<p class="sub">这是本作唯一的护城河。现有代码里已经有完整的"连通块 + 气"计算（被围判定），以下机制都是在它上面生长，而不是另起一套。</p>
+
+<h3>7.1 气数可视化（零门槛的"可读性"改造）</h3>
+<div class="grid2">
+  <div class="card tight">
+    <h4 style="margin-top:0">表现</h4>
+    <ul style="margin-bottom:0">
+      <li>棋子脚下显示该<b>连通块当前气数</b>（小圆点 / 数字）</li>
+      <li>气 = 1 时红色脉冲 + 心跳音效（"叫吃"预警）</li>
+      <li>气 = 0 时被提子：拔花特效 + 棋盘格子留白 1 秒</li>
+      <li>拥有双眼的连通块显示"活"字印（金色）</li>
+    </ul>
+  </div>
+  <div class="card tight">
+    <h4 style="margin-top:0">为什么先做这个</h4>
+    <p style="margin:0 0 6px">现在的"被围"是<b>不可见</b>的——玩家只能通过伤害数字反推。把它可视化之后，围棋规则从"隐藏机制"变成"可操作的战术信息"，同时为提子/眼位/打劫铺好了认知基础。</p>
+    <p class="note" style="margin-bottom:0">复用现有：<code>ChessPieceMgr</code> 里的连通块遍历与气计数；被围标识 <code>围_0001</code> 的帧动画可直接扩展成"气数指示器"。</p>
+  </div>
+</div>
+
+<h3>7.2 提子（把"×4 伤害"升级成处决）</h3>
+<table>
+  <thead><tr><th>阶段</th><th>规则</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>叫吃（气 = 1）</td><td>受伤 ×2，红色预警</td><td>给玩家一回合反应时间（留出救棋的操作空间）</td></tr>
+    <tr><td>提子（气 = 0）</td><td>该连通块<b>全部被提走</b>（不再是 4 倍伤害）</td><td>战斗高潮：一次提 3 子以上触发全屏特效与慢动作</td></tr>
+    <tr><td>棋魂</td><td>每被提 1 子产出 1 点"棋魂"，可换遗物 / 装备 / 免费棋子</td><td>把"被吃"从纯亏损变成资源，降低挫败感</td></tr>
+    <tr><td>反提</td><td>被提位置相邻的敌人受到 50% 伤害（需遗物/羁绊解锁）</td><td>给"诱敌深入"提供战术深度</td></tr>
+  </tbody>
+</table>
+
+<h3>7.3 眼位与活棋（最快让玩家"懂围棋"的一课）</h3>
+<ul>
+  <li><b>真眼判定</b>：连通块拥有 2 个以上"真眼"（被自己完全围住的空点，且对方无法在眼内落子）→ 判定为<b>活棋</b>。</li>
+  <li><b>活棋收益</b>：免疫提子 + 全队攻速 +10%（可叠加 2 层）+ 金色"活"印。</li>
+  <li><b>教学价值</b>：玩家会在两三局内自发领悟"要做眼"——本作最优雅的规则教学，不需要任何文字教程。</li>
+</ul>
+
+<h3>7.4 打劫（Ko）：给战斗一个"高潮"结构</h3>
+<div class="card">
+  <p style="margin-top:0">连续提子触发<b>打劫</b>：被提方在 2 回合内不能立即提回原位（打劫禁着），期间双方每回合获得 +1 行动力与 +3 金币，且打劫区高亮。</p>
+  <ul style="margin-bottom:0">
+    <li><b>作用一</b>：制造"局势拉锯"的戏剧性节点，取代现在平铺直叙的攻防。</li>
+    <li><b>作用二</b>：给"劫材"这个概念一个游戏化出口——打劫期间每回合产出"遗物碎片"。</li>
+    <li><b>作用三</b>：AI 人格的差异化载体（"劫匪"人格会主动制造打劫）。</li>
+  </ul>
+</div>
+
+<h3>7.5 地盘计分与棋形加成</h3>
+<div class="grid2">
+  <div class="card tight">
+    <h4 style="margin-top:0">地盘计分（章节结算）</h4>
+    <p style="margin:0">每章结束时按"围住的空点"计分：地盘多的一方获得章节奖励（金币 / 遗物 / 免费升星）。这让玩家在 Build 之外多了一条<b>"围地"的胜利路线</b>——和自走棋的"打爆对面"形成双胜利条件。</p>
+  </div>
+  <div class="card tight">
+    <h4 style="margin-top:0">棋形加成（形合）</h4>
+    <p style="margin:0 0 6px">摆出经典棋形触发强力效果，棋盘越高亮提示：</p>
+    <ul style="margin-bottom:0">
+      <li><b>直三 / 弯三</b> → 该连通块攻速 +25%</li>
+      <li><b>梅花五</b> → 连通块无敌 3 秒</li>
+      <li><b>刀把五</b> → 被提时改为对敌方全体造成伤害</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 8 -->
+<h2 class="sec" id="s8"><span class="n">08</span>遗物系统（50+，规则级改造）</h2>
+<p class="sub">肉鸽的灵魂：遗物不该只是"+10% 攻击"，而应该<b>改写规则</b>。以下 12 个示例覆盖四条轴：经济 / 战斗 / 围棋 / 流派。</p>
+
+<table>
+  <thead><tr><th style="width:130px">遗物</th><th style="width:80px">轴</th><th>效果</th><th>为什么有趣</th></tr></thead>
+  <tbody>
+    <tr><td><b>棋魂灯</b></td><td><span class="chip c-amber">经济</span></td><td>我方每被提 1 子，永久 +2 金币/回合</td><td>把"挨打"变成经济引擎，反向构筑</td></tr>
+    <tr><td><b>潮汐</b></td><td><span class="chip c-amber">经济</span></td><td>金币每满 10 的倍数，行动力 +1</td><td>鼓励"屯钱"的另一种节奏</td></tr>
+    <tr><td><b>众叛</b></td><td><span class="chip c-amber">经济</span></td><td>刷新免费，但棋子售价 +30%</td><td>明牌交换：赌运气还是赌钱包</td></tr>
+    <tr><td><b>屠龙</b></td><td><span class="chip c-red">战斗</span></td><td>单次提子 ≥3 时，全队攻速 +40%（本局永久）</td><td>与"提子"内核绑定，越滚越强</td></tr>
+    <tr><td><b>兵书</b></td><td><span class="chip c-red">战斗</span></td><td>近战羁绊人数 +2</td><td>让羁绊路径更早达成</td></tr>
+    <tr><td><b>观棋不语</b></td><td><span class="chip c-red">战斗</span></td><td>前 10 秒不落子，获得 50% 护盾</td><td>用"忍"换取节奏，反常规开局</td></tr>
+    <tr><td><b>鬼手</b></td><td><span class="chip c-jade">围棋</span></td><td>你的提子附带"反提"（相邻敌人受 50% 伤害）</td><td>提子流的核心组件</td></tr>
+    <tr><td><b>天元尺</b></td><td><span class="chip c-jade">围棋</span></td><td>落子在天元格的棋子攻速 +50%、气 +1</td><td>把"天元"变成必争之地</td></tr>
+    <tr><td><b>湿棋</b></td><td><span class="chip c-jade">围棋</span></td><td>敌人每次落子有 15% 概率失败（"棋子太滑"）</td><td>幽默 + 直接的强度收益</td></tr>
+    <tr><td><b>劫材</b></td><td><span class="chip c-jade">围棋</span></td><td>打劫期间每回合获得 1 个遗物碎片（3 个换 1 遗物）</td><td>把打劫变成刷资源的机会</td></tr>
+    <tr><td><b>兽印</b></td><td><span class="chip c-violet">流派</span></td><td>妖兽羁绊人数 +2，且提子也叠加攻击</td><td>为妖兽流提供"质变"节点</td></tr>
+    <tr><td><b>阴阳</b></td><td><span class="chip c-violet">流派</span></td><td>一次性：与敌人整片阵型互换位置（解围/反包围）</td><td>一盘棋级的战术翻盘</td></tr>
+  </tbody>
+</table>
+<p class="note">设计约束：<b>任何遗物都不允许"纯数值 +20%"</b>——每个遗物必须改写一条判定或规则，否则不进池。这条约束能让 50 个遗物各自有记忆点。</p>
+
+<!-- 9 -->
+<h2 class="sec" id="s9"><span class="n">09</span>局内天赋三选一</h2>
+<p class="sub">每通过一个节点获得 1 级（Lv1~12），每级三选一。天赋负责"小步快跑"的成长感，与遗物的"规则改写"分层。</p>
+<div class="grid3">
+  <div class="card tight"><h4 style="margin-top:0">进攻类</h4><ul style="margin-bottom:0">
+    <li>近战攻速 +15%</li><li>对"叫吃"目标伤害 +30%</li><li>落子后该棋子首次攻击必定暴击</li></ul></div>
+  <div class="card tight"><h4 style="margin-top:0">围棋类</h4><ul style="margin-bottom:0">
+    <li>被围伤害倍率 ×4 → ×6</li><li>每回合首个落子 +1 气</li><li>提子后恢复 1 点行动力</li></ul></div>
+  <div class="card tight"><h4 style="margin-top:0">经济类</h4><ul style="margin-bottom:0">
+    <li>商店首次刷新免费</li><li>每回合首次落子 -1 金</li><li>节点结束额外 +2 金币</li></ul></div>
+  <div class="card tight"><h4 style="margin-top:0">流派类</h4><ul style="margin-bottom:0">
+    <li>指定 1 个羁绊 +1 人数</li><li>本局手牌上限 +1</li><li>开局多 1 个随机 2 星棋子</li></ul></div>
+</div>
+
+<!-- 10 -->
+<h2 class="sec" id="s10"><span class="n">10</span>AI 人格：把"一个状态机"变成 8 个对手</h2>
+<p class="sub">现有 AI 已经是状态机（选棋 → 落子 → 移动），扩展成"人格 = 权重表 + 行为脚本"的成本非常低，收益却是"每局对手都不一样"。</p>
+
+<table>
+  <thead><tr><th style="width:110px">人格</th><th>行为特征</th><th>克制它的方式（玩家的解题点）</th></tr></thead>
+  <tbody>
+    <tr><td><b>铁壁</b> <span class="chip c-blue">围地</span></td><td>优先进角守边、抢做双眼，很少主动进攻</td><td>用提子流切开它的连通块</td></tr>
+    <tr><td><b>疯狗</b> <span class="chip c-red">抢气</span></td><td>贴着你的棋子落子、疯狂叫吃</td><td>它经济差，耐心换血即可</td></tr>
+    <tr><td><b>雷法</b> <span class="chip c-violet">AOE</span></td><td>极限堆法师羁绊，集中范围伤害</td><td>分散站位、别抱团（与棋灵流互斥）</td></tr>
+    <tr><td><b>龟公</b> <span class="chip c-amber">屯钱</span></td><td>前 60 秒几乎不落子，之后一波铺满</td><td>前期压血线，别给它翻盘窗口</td></tr>
+    <tr><td><b>劫匪</b> <span class="chip c-jade">打劫</span></td><td>主动制造打劫、反复争夺同一点</td><td>做眼走活棋，让它无劫可打</td></tr>
+    <tr><td><b>兽群</b> <span class="chip c-violet">铺场</span></td><td>低费妖兽堆数量，靠妖兽羁绊滚攻击</td><td>AOE / 提子清场</td></tr>
+    <tr><td><b>棋圣</b> <span class="chip c-red">Boss</span></td><td>镜像你的构筑，但属性略高；每章学习你的习惯</td><td>用没展示过的遗物组合打信息差</td></tr>
+    <tr><td><b>史莱姆之王</b> <span class="chip c-red">Boss</span></td><td>分裂 + 复活，越拖越难杀；棋盘随回合变拥挤</td><td>速攻提子，别让它铺满 81 格</td></tr>
+  </tbody>
+</table>
+<p class="note">实现路径：每个 AI 人格 = 一份「权重配置」（落子偏好、进攻/防守阈值、提子欲望）+ 可选的行为脚本。现有 <code>SelectPieceState</code> / <code>MeleePlaceState</code> / <code>RangedPlaceState</code> / <code>MovePieceState</code> 可以直接参数化复用。</p>
+
+<!-- 11 -->
+<h2 class="sec" id="s11"><span class="n">11</span>经济与节奏数值</h2>
+<div class="grid2">
+  <div>
+    <h3>金币收支（单节点基准）</h3>
+    <table>
+      <thead><tr><th>项目</th><th class="num">金额</th></tr></thead>
+      <tbody>
+        <tr><td>基础节点奖励</td><td class="num">+6</td></tr>
+        <tr><td>剩余时间奖励（每秒 +0.05，上限 +5）</td><td class="num">+0~5</td></tr>
+        <tr><td>利息（每 10 金币 +1，上限 +5）</td><td class="num">+0~5</td></tr>
+        <tr><td>连败补偿（2/3 连败）</td><td class="num">+2 / +4</td></tr>
+        <tr><td>补给车羁绊</td><td class="num">+1 × 人数</td></tr>
+        <tr><td>落子支出（对齐现有 <code>f_exp</code>）</td><td class="num">-3 ~ -12</td></tr>
+        <tr><td>刷新 / 升星 / 装备</td><td class="num">-2 / -6 / -5</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <h3>节奏（单节点 2~3 分钟）</h3>
+    <table>
+      <thead><tr><th>时间</th><th>事件</th></tr></thead>
+      <tbody>
+        <tr><td>0–20s</td><td>布阵期：双方落子（不判胜负，沿用现有 20 秒保护）</td></tr>
+        <tr><td>20s–90s</td><td>交战期：自动攻防、气数变化、提子</td></tr>
+        <tr><td>90s–150s</td><td>决胜期：地盘计分开始提示，行动力回复加速</td></tr>
+        <tr><td>150s+</td><td>超时：按"地盘 + 剩余血量"裁决（替代现有的 600 秒硬上限）</td></tr>
+      </tbody>
+    </table>
+    <p class="note">现有 600 秒上限可缩短到 <code>150~180 秒</code>：肉鸽需要"短节点、多决策"，长局更适合放在 Boss 战。</p>
+  </div>
+</div>
+
+<!-- 12 -->
+<h2 class="sec" id="s12"><span class="n">12</span>局外 Meta：师门 · 棋谱 · 每日棋局 · 天梯</h2>
+<table>
+  <thead><tr><th style="width:120px">系统</th><th>内容</th><th>复用现有</th></tr></thead>
+  <tbody>
+    <tr><td><b>师门</b></td><td>4~6 个门派（势 / 气 / 劫 / 形…），各有初始棋子池、被动与专属遗物池，用局外经验解锁</td><td><code>T_Role.isUnlock</code>、酒馆解锁流程</td></tr>
+    <tr><td><b>棋谱</b></td><td>成就树：解锁新棋子、新遗物、新盘面；每章掉落"棋谱残页"</td><td>现有成就系统（<code>GameAchieveMgr</code>）</td></tr>
+    <tr><td><b>每日棋局</b></td><td>固定种子，全服同一张地图，比拼"最少花费通关"</td><td><code>T_Level.minSpend</code>（现成的最少花费记录）</td></tr>
+    <tr><td><b>天梯（异步 PvP）</b></td><td>上传你的棋盘快照作为对手；对方离线复现你的阵容与站位</td><td><code>Player1 / Player2</code> 双阵营 + <code>PvpPanel</code></td></tr>
+    <tr><td><b>称号 / 头像框</b></td><td>成就 → 称号与装饰，用于排行榜展示</td><td>现有成就与结算面板</td></tr>
+    <tr><td><b>续命</b></td><td>每局 1~2 次失败后继续（看广告或消耗棋魂）</td><td>现有广告复活逻辑</td></tr>
+  </tbody>
+</table>
+
+<!-- 13 -->
+<h2 class="sec" id="s13"><span class="n">13</span>界面与表现（复用现有美术）</h2>
+<div class="grid2">
+  <div class="card tight">
+    <h4 style="margin-top:0">可直接复用</h4>
+    <ul style="margin-bottom:0">
+      <li>棋子三档立绘 + 帧动画 + 底座 + 被围标识（<code>PieceArtConfig</code>，57 条配置已在用）</li>
+      <li>已合图集（177 张）：新增图标继续往 packables 里加即可保持合批</li>
+      <li>子弹表现与技能文字（法师专属子弹已分好）</li>
+      <li>结算面板 → 扩展成"节点结算 + 章节结算"两层</li>
+    </ul>
+  </div>
+  <div class="card tight">
+    <h4 style="margin-top:0">需要新增美术（估算）</h4>
+    <ul style="margin-bottom:0">
+      <li>羁绊图标 ×12、遗物图标 ×50（可用统一底框 + 简笔符号，两个美术日）</li>
+      <li>星级角标、气数指示器、"活"字印（各 1 张九宫格）</li>
+      <li>提子拔花特效 1 组、打劫高亮 1 组</li>
+      <li>远征地图节点图标 ×7（战斗/精英/事件/商店/铁匠/宝箱/Boss）</li>
+    </ul>
+  </div>
+</div>
+<p class="note">新增总量约 <b>75~90 张 UI 图</b>，不含棋子立绘——这是本方案在美术上的全部成本，因为棋子本身的 3 档帧动画已经画完了。</p>
+
+<!-- 14 -->
+<h2 class="sec" id="s14"><span class="n">14</span>现有代码复用对照表</h2>
+<p class="sub">这一节是给程序看的：每个新系统对应到现有工程的哪块代码，以及改动量评估。</p>
+<table>
+  <thead><tr><th style="width:230px">现有资产</th><th>新用途</th><th style="width:90px">改动量</th></tr></thead>
+  <tbody>
+    <tr><td><code>T_Role.f_profession</code></td><td>职业羁绊轴（4 类扩展到 6 类）</td><td><span class="chip c-jade">表加列</span></td></tr>
+    <tr><td><code>T_Role.f_zhongzu</code></td><td>种族羁绊轴（新增 6 个种族）</td><td><span class="chip c-jade">表加列</span></td></tr>
+    <tr><td><code>T_Role.f_level</code>（3 档）</td><td>三合一升星档位</td><td><span class="chip c-jade">逻辑复用</span></td></tr>
+    <tr><td><code>PieceArtConfig</code>（57 条）</td><td>升星后自动切换立绘档位</td><td><span class="chip c-jade">零改动</span></td></tr>
+    <tr><td><code>T_Level.f_gklx</code>（战争/冒险/新手）</td><td>节点类型（战斗 / 事件 / 教学）</td><td><span class="chip c-gray">语义扩展</span></td></tr>
+    <tr><td><code>T_Level.minSpend</code></td><td>每日棋局 / 天梯的"最少花费"评分</td><td><span class="chip c-jade">零改动</span></td></tr>
+    <tr><td><code>ChessPieceMgr</code> 连通块 + 气算法</td><td>提子 / 眼位 / 打劫 / 地盘计分的基础</td><td><span class="chip c-amber">扩展</span></td></tr>
+    <tr><td>棋盘网格索引（O(1) 取子）</td><td>盘面变体（禁用格 / 加成格）</td><td><span class="chip c-jade">小改</span></td></tr>
+    <tr><td>AI 状态机（4 个 State）</td><td>8 种 AI 人格（权重表参数化）</td><td><span class="chip c-amber">参数化</span></td></tr>
+    <tr><td><code>TavernPanel</code>（酒馆）</td><td>节点商店（候选 / 刷新 / 锁牌）</td><td><span class="chip c-amber">升级 UI</span></td></tr>
+    <tr><td><code>Player1 / Player2</code> 阵营 + <code>PvpPanel</code></td><td>异步天梯（快照对战）</td><td><span class="chip c-amber">扩展</span></td></tr>
+    <tr><td><code>GameAchieveMgr</code> 成就</td><td>棋谱 / 称号 / 遗物解锁条件</td><td><span class="chip c-jade">复用</span></td></tr>
+    <tr><td>广告复活</td><td>肉鸽续命</td><td><span class="chip c-jade">复用</span></td></tr>
+    <tr><td>性能架构（满盘 60 棋子 4.2ms）</td><td>承载 2 倍单位 + 遗物特效 + 气数表现</td><td><span class="chip c-jade">有余量</span></td></tr>
+  </tbody>
+</table>
+
+<!-- 15 -->
+<h2 class="sec" id="s15"><span class="n">15</span>开发路线图 P0–P3</h2>
+<p class="sub">核心原则：<b>P0 不新增任何美术</b>，只用现有资源把"自走棋化"做出来，先验证观感是否质变，再决定后续投入。</p>
+
+<div class="road">
+  <div class="step p0">
+    <h4>P0 · 自走棋化（1~2 周 · 无新美术）</h4>
+    <div class="dur">目标：同样的棋盘，观感完全不同</div>
+    <ul>
+      <li>羁绊系统（职业 4 轴 + 种族 4 轴，用现有两个字段）</li>
+      <li>三合一升星（复用 3 档立绘）</li>
+      <li>节点商店：5 张候选 + 刷新 2 金 + 锁牌（复用酒馆 UI）</li>
+      <li>局内三选一天赋（12 级）</li>
+      <li>气数可视化 + 叫吃预警</li>
+    </ul>
+  </div>
+  <div class="step p1">
+    <h4>P1 · 肉鸽骨架（3~5 周）</h4>
+    <div class="dur">目标：一局 30 分钟有起伏</div>
+    <ul>
+      <li>远征地图（3 章 × 5~8 节点，随机 + 固定种子）</li>
+      <li>遗物系统（30 个，含 4 条轴）</li>
+      <li>残局事件房（复用现有气判定，生成死活题）</li>
+      <li>盘面变体（星位盘 / 封锁盘）</li>
+      <li>AI 人格 4 个（铁壁 / 疯狗 / 雷法 / 龟公）</li>
+    </ul>
+  </div>
+  <div class="step p2">
+    <h4>P2 · 围棋内核 + Meta（6~10 周）</h4>
+    <div class="dur">目标：做出护城河</div>
+    <ul>
+      <li>提子（处决）+ 棋魂资源 + 反提</li>
+      <li>眼位与活棋判定</li>
+      <li>打劫（Ko）机制</li>
+      <li>地盘计分 + 棋形加成</li>
+      <li>每日棋局（固定种子 + 最少花费榜）</li>
+      <li>天梯异步 PvP（快照对战）</li>
+      <li>师门 / 棋谱局外成长</li>
+    </ul>
+  </div>
+  <div class="step p3">
+    <h4>P3 · 长线运营（持续）</h4>
+    <div class="dur">目标：留存与传播</div>
+    <ul>
+      <li>赛季与排行榜、称号外观</li>
+      <li>Boss 人格 2 个（棋圣 / 史莱姆之王）</li>
+      <li>更多棋盘尺寸与地形（11×11 远征）</li>
+      <li>遗物池扩充到 80+、角色扩展到 8 职业</li>
+      <li>回放与观战（棋盘快照序列）</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 16 -->
+<h2 class="sec" id="s16"><span class="n">16</span>风险、取舍与验证指标</h2>
+<div class="grid2">
+  <div>
+    <h3>风险与对策</h3>
+    <table>
+      <thead><tr><th>风险</th><th>对策</th></tr></thead>
+      <tbody>
+        <tr><td><b>围棋门槛太高</b></td><td>只保留气 / 提子 / 眼位 / 打劫 / 地盘五条最直觉规则；用气数可视化与新手指引替代文字教程</td></tr>
+        <tr><td><b>改动一次太多</b></td><td>严格按 P0→P1→P2 推进，P0 只用现有资源验证观感</td></tr>
+        <tr><td><b>单局太长</b></td><td>节点 150~180 秒；允许中途存档退出；每章结束留"保存并离开"</td></tr>
+        <tr><td><b>数值膨胀</b></td><td>建立"战力换算表"（1 星 = 1.0 单位），所有加成按单位换算，禁止线性叠乘</td></tr>
+        <tr><td><b>自走棋同质化</b></td><td>所有羁绊/遗物必须与"气/提子/地盘"至少发生一次交互</td></tr>
+        <tr><td><b>随机性带来挫败</b></td><td>保底机制：连败 2 次后商店必出 1 张紫卡；每章首次刷新免费</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div>
+    <h3>验证指标（P0 上线后观察）</h3>
+    <table>
+      <thead><tr><th>指标</th><th>目标</th></tr></thead>
+      <tbody>
+        <tr><td>单节点平均时长</td><td>120~180 秒</td></tr>
+        <tr><td>单局平均时长</td><td>30~45 分钟</td></tr>
+        <tr><td>一局内"羁绊达成数"</td><td>≥2 条（证明构筑成立）</td></tr>
+        <tr><td>商店刷新次数 / 节点</td><td>≥1.5 次（证明金币有取舍）</td></tr>
+        <tr><td>失败原因分布</td><td>不应 80% 集中在"经济崩溃"</td></tr>
+        <tr><td>满盘（≥60 棋子）帧耗时</td><td>主线程 &lt; 8 ms（当前 4.2~4.8 ms，有余量）</td></tr>
+        <tr><td>次日留存（内测）</td><td>≥ 25%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 17 -->
+<h2 class="sec" id="s17"><span class="n">17</span>附录：术语与对标</h2>
+<div class="grid2">
+  <div class="card tight">
+    <h4 style="margin-top:0">术语表</h4>
+    <table style="margin-bottom:0">
+      <tbody>
+        <tr><td><b>气</b></td><td>连通块相邻的空点数，为 0 即被提</td></tr>
+        <tr><td><b>叫吃</b></td><td>气 = 1，处于被提边缘的状态</td></tr>
+        <tr><td><b>眼</b></td><td>被己方完全围住的空点；两眼即活棋</td></tr>
+        <tr><td><b>打劫</b></td><td>双方反复争夺同一提子点的规则</td></tr>
+        <tr><td><b>地盘</b></td><td>己方围住的空点总数，用于章节计分</td></tr>
+        <tr><td><b>棋魂</b></td><td>我方被提子产出的资源，可换遗物 / 装备</td></tr>
+        <tr><td><b>师门</b></td><td>局外可选择的流派起点，影响初始棋子池</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card tight">
+    <h4 style="margin-top:0">对标与差异</h4>
+    <table style="margin-bottom:0">
+      <thead><tr><th>对标</th><th>借鉴</th><th>本作差异</th></tr></thead>
+      <tbody>
+        <tr><td>杀戮尖塔</td><td>节点地图、遗物、事件房</td><td>战斗是棋盘自动战斗而非卡牌回合</td></tr>
+        <tr><td>云顶之弈</td><td>商店刷新、三合一、羁绊</td><td>羁绊之外还有"气/提子"的第二套生死规则</td></tr>
+        <tr><td>月圆之夜</td><td>单局仪式感、轻量单手操作</td><td>棋盘空间策略取代卡组构筑</td></tr>
+        <tr><td>围棋（死活题）</td><td>气、眼、打劫</td><td>把死活转化为实时战斗与构筑资源</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="sep"></div>
+<blockquote>
+  <p><b>一句话总结</b>：现有工程已经具备了"棋盘 + 气 + 自动战斗 + 3 档棋子美术 + 双阵营 + 成就 + 广告 + 可用性能"的全部零件；
+  本方案不是重做，而是<b>把自走棋的构筑骨架装进这副围棋骨架上，再用肉鸽的随机性驱动它反复重玩</b>。</p>
+</blockquote>
+
+<footer>
+  围棋史莱姆 · 玩法拓展策划案 v1.0 ｜ 2026-10-11 ｜ 依据当前工程实测数据撰写（棋盘 9×9 · 65 角色 · 57 条美术配置 · 满盘 60 棋子主线程 4.2–4.8ms）<br>
+  文件位置：<code>Assets/玩法拓展/玩法拓展策划案.html</code>
+</footer>
+
+</div>
+</body>
+</html>
